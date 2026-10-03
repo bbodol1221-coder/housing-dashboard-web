@@ -8,17 +8,18 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <style>
-/* TDS(토스 디자인 시스템) 톤 참고: 회색 단계 + 파랑 강조, 테두리 대신 면, 큰 라운드 */
+/* TDS:BEGIN (tds-tokens.css v1) 이 블록은 sync_tds.py가 덮어씁니다. 값은 Development/TDS/tds-tokens.css에서만 고치세요. */
 :root{
   color-scheme:light;
   --bg:#f2f4f6; --surface:#ffffff; --fill:#f2f4f6; --fill-2:#f9fafb; --divider:#e5e8eb;
   --t1:#191f28; --t2:#333d4b; --t3:#4e5968; --t4:#6b7684; --t5:#8b95a1; --t6:#b0b8c1;
   --blue:#3182f6; --blue-press:#1b64da; --blue-soft:#e8f3ff; --blue-soft-t:#1b64da;
-  --jamsil:#eb6834; --pangyo:#1baf7a;
-  --seq-1:#b7d3f6; --seq-2:#6da7ec; --seq-3:#2a78d6; --seq-4:#104281;
+  --red:#f04452; --red-soft:#ffeeee; --red-soft-t:#d22030;
+  --good:#03b26c; --good-soft:#e5f8ef; --good-t:#028a54;
   --warn-soft:#fff3e0; --warn-t:#b25b00;
   --shadow:0 2px 12px rgba(0,27,55,.06);
   --shadow-hi:0 8px 24px rgba(0,27,55,.10);
+  --font-sans:'Pretendard',-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Noto Sans KR',sans-serif;
 }
 @media (prefers-color-scheme: dark){
   :root:where(:not([data-theme="light"])){
@@ -26,8 +27,8 @@
     --bg:#101013; --surface:#1c1c21; --fill:#2c2c35; --fill-2:#232329; --divider:#2c2c35;
     --t1:#ffffff; --t2:#e4e4e9; --t3:#c3c3c9; --t4:#9e9ea4; --t5:#7e7e87; --t6:#56565f;
     --blue:#449bff; --blue-press:#6aafff; --blue-soft:#1d2a3d; --blue-soft-t:#8ec3ff;
-    --jamsil:#d95926; --pangyo:#199e70;
-    --seq-1:#184f95; --seq-2:#2a78d6; --seq-3:#5598e7; --seq-4:#b7d3f6;
+    --red:#f5646f; --red-soft:#3a1d21; --red-soft-t:#ff9aa2;
+    --good:#1ec580; --good-soft:#12301f; --good-t:#5fdca3;
     --warn-soft:#33260f; --warn-t:#f0b35c;
     --shadow:none; --shadow-hi:0 8px 24px rgba(0,0,0,.4);
   }
@@ -37,10 +38,38 @@
   --bg:#101013; --surface:#1c1c21; --fill:#2c2c35; --fill-2:#232329; --divider:#2c2c35;
   --t1:#ffffff; --t2:#e4e4e9; --t3:#c3c3c9; --t4:#9e9ea4; --t5:#7e7e87; --t6:#56565f;
   --blue:#449bff; --blue-press:#6aafff; --blue-soft:#1d2a3d; --blue-soft-t:#8ec3ff;
-  --jamsil:#d95926; --pangyo:#199e70;
-  --seq-1:#184f95; --seq-2:#2a78d6; --seq-3:#5598e7; --seq-4:#b7d3f6;
+  --red:#f5646f; --red-soft:#3a1d21; --red-soft-t:#ff9aa2;
+  --good:#1ec580; --good-soft:#12301f; --good-t:#5fdca3;
   --warn-soft:#33260f; --warn-t:#f0b35c;
   --shadow:none; --shadow-hi:0 8px 24px rgba(0,0,0,.4);
+}
+/* TDS:END */
+/* 프로젝트 전용 토큰 */
+:root{
+  --jamsil:#eb6834;
+  --pangyo:#1baf7a;
+  --seq-1:#b7d3f6;
+  --seq-2:#6da7ec;
+  --seq-3:#2a78d6;
+  --seq-4:#104281;
+}
+@media (prefers-color-scheme: dark){
+  :root:where(:not([data-theme="light"])){
+    --jamsil:#d95926;
+    --pangyo:#199e70;
+    --seq-1:#184f95;
+    --seq-2:#2a78d6;
+    --seq-3:#5598e7;
+    --seq-4:#b7d3f6;
+  }
+}
+:root[data-theme="dark"]{
+  --jamsil:#d95926;
+  --pangyo:#199e70;
+  --seq-1:#184f95;
+  --seq-2:#2a78d6;
+  --seq-3:#5598e7;
+  --seq-4:#b7d3f6;
 }
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{height:100%}
