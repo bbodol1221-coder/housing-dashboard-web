@@ -376,6 +376,7 @@ td.hc{width:36px;padding:6px 0 6px 10px}
     <h2>무엇이 더 중요한가요? <button class="txtbtn" id="resetW">기본값</button></h2>
     <div id="weights"></div>
     <p class="hint">통근 점수는 두 사람 통근시간의 평균과 더 긴 쪽을 반반 섞어요. 한 사람만 오래 걸리는 집은 점수가 깎여요.</p>
+    <p class="hint">평수 점수는 예산 안에서 살 수 있는 가장 넓은 평형의 전용면적이 넓을수록 높아요.</p>
     <p class="hint">매매가는 최근 시세예요. 마지막 거래 전 3개월 안에 2건 이상 거래가 있으면 그 중위값, 없으면 1년 중위값이에요.</p>
     <p class="hint">세대수 정보가 아직 없는 단지는 단지 규모 조건에서 빼지 않아요.</p>
     <p class="hint">대출 규제(LTV·DSR)는 2026년 9월 검색 기준이에요. 실제 대출 전에 은행에서 꼭 확인하세요.</p>
@@ -442,6 +443,7 @@ const METRICS = [
   {key:'cost',    label:'월 상환', def:37.5},
   {key:'transit', label:'교통',   def:12.5},
   {key:'conv',    label:'편의',   def:12.5},
+  {key:'area',    label:'평수',   def:12.5},
 ];
 const $ = id => document.getElementById(id);
 const fmtEok = v => v >= 10000 ? (v/10000).toFixed(2).replace(/\.?0+$/,'') + '억' : Math.round(v).toLocaleString() + '만';
@@ -513,6 +515,7 @@ function evaluate(I){
         cost: best.b.pay,
         transit: (j.transfers + p.transfers)/2 + ((j.walk + p.walk)/2)/10,  // 환승 1회 ≈ 도보 10분
         conv,
+        area: best.u.area,   // 예산 안 가장 넓은 평형의 전용면적
       }});
   }
   // 정규화: 0(나쁨)~1(좋음). 비용형은 뒤집는다.
@@ -520,7 +523,7 @@ function evaluate(I){
   for (const m of METRICS){
     const vals = rows.map(r => r.raw[m.key]).filter(v => v != null);
     const lo = Math.min(...vals), hi = Math.max(...vals);
-    const benefit = m.key === 'conv';
+    const benefit = m.key === 'conv' || m.key === 'area';
     for (const r of rows){
       r.n = r.n || {};
       const v = r.raw[m.key];
