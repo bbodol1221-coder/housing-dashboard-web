@@ -75,7 +75,7 @@
 html,body{height:100%}
 body{font-family:'Pretendard',-apple-system,sans-serif;background:var(--bg);color:var(--t1);
   -webkit-font-smoothing:antialiased;letter-spacing:-.01em;
-  display:grid;grid-template-columns:340px 1fr;grid-template-rows:auto 1fr;height:100%;overflow:hidden}
+  display:grid;grid-template-columns:var(--aside-w,340px) 1fr;grid-template-rows:auto 1fr;height:100%;overflow:hidden}
 button,input,select{font-family:inherit;color:inherit;letter-spacing:inherit}
 :focus-visible{outline:2px solid var(--blue);outline-offset:2px}
 .num{font-variant-numeric:tabular-nums}
@@ -92,7 +92,7 @@ header h1{font-size:1.25rem;font-weight:700;letter-spacing:-.03em}
   padding:7px 12px;border-radius:10px}
 
 /* ── 왼쪽 패널 ── */
-aside{background:var(--surface);overflow-y:auto;border-top:1px solid var(--divider)}
+aside{background:var(--surface);overflow-y:auto;border-top:1px solid var(--divider);position:relative}
 .sec{padding:20px 20px 16px}
 .sec + .sec{border-top:8px solid var(--bg)}
 .sec h2{font-size:1.02rem;font-weight:700;color:var(--t1);margin-bottom:14px;display:flex;align-items:center;justify-content:space-between}
@@ -192,6 +192,10 @@ main{min-height:0;overflow-y:auto}
 .near b{color:var(--t1)}
 .near .ln{display:inline-block;font-size:.7rem;font-weight:700;color:#fff;border-radius:5px;padding:1px 6px;margin-left:3px}
 .flag.over{background:var(--red-soft);color:var(--red-soft-t)}
+.vsplit{position:fixed;top:0;bottom:0;width:12px;margin-left:-6px;z-index:900;cursor:col-resize;touch-action:none;display:flex;align-items:center;justify-content:center}
+.vsplit span{width:4px;height:44px;border-radius:2px;background:var(--t6);opacity:0;transition:opacity .15s,background .15s,height .15s}
+.vsplit:hover span,.vsplit.drag span,.vsplit:focus-visible span{opacity:1;background:var(--blue);height:64px}
+body.resizing-x{cursor:col-resize;user-select:none}
 .splitter{height:20px;margin:0 20px;display:flex;align-items:center;justify-content:center;cursor:row-resize;touch-action:none;user-select:none}
 .splitter span{width:44px;height:5px;border-radius:3px;background:var(--t6);transition:background .15s,width .15s}
 .splitter:hover span,.splitter.drag span,.splitter:focus-visible span{background:var(--blue);width:64px}
@@ -412,6 +416,7 @@ body.loan aside .sec:not(:first-child){display:none}
   .mapwrap{height:52vh;margin:0 16px}
   .tablewrap{margin:0 16px 16px}
   .splitter{margin:0 16px;height:28px}
+  .vsplit{display:none}
   .tscroll{max-height:70vh}
   .search{width:100%;margin-left:0}
   .tabhead{flex-wrap:wrap}
@@ -466,12 +471,13 @@ body.loan aside .sec:not(:first-child){display:none}
     <p class="hint">통근 점수는 두 사람 통근시간의 평균과 더 긴 쪽을 반반 섞어요. 한 사람만 오래 걸리는 집은 점수가 깎여요.</p>
     <p class="hint">평수 점수는 예산 안에서 살 수 있는 가장 넓은 평형의 전용면적이 넓을수록 높아요.</p>
     <p class="hint">매매가는 최근 시세예요. 마지막 거래 전 3개월 안에 2건 이상 거래가 있으면 그 중위값, 없으면 1년 중위값이에요.</p>
-    <p class="hint">지도에서 구를 누르면 그 구 단지만 보여요. 같은 구를 다시 누르면 풀려요. 점을 누르면 요약 카드가 뜨고, 카드를 누르면 자세히 볼 수 있어요.</p>
+    <p class="hint">지도에서 구를 누르면 그 구 단지만 보여요. 같은 구를 다시 누르면 풀려요. 점을 누르면 요약 카드가 뜨고, 카드를 누르면 자세히 볼 수 있어요. 왼쪽 패널 오른쪽 끝과 지도 아래 막대를 끌면 크기를 바꿀 수 있어요(더블클릭하면 원래대로).</p>
     <p class="hint">세대수 정보가 아직 없는 단지는 단지 규모 조건에서 빼지 않아요.</p>
     <p class="hint">대출 규제(LTV·금액 상한·DSR)는 2025년 10·15 대책 기준이에요(2026년 10월 확인). 실제 대출 전에 은행에서 꼭 확인하세요.</p>
   </section>
 </aside>
 
+<div class="vsplit" id="vsplit" role="separator" aria-orientation="vertical" aria-label="왼쪽 패널 너비 조절" tabindex="0"><span></span></div>
 <main>
   <section class="duo" id="duo"></section>
   <section class="top3" id="top3"></section>
@@ -1166,6 +1172,32 @@ draw(true);
   sp.addEventListener('keydown', e => {
     if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return;
     e.preventDefault(); setH(wrap.offsetHeight + (e.key === 'ArrowDown' ? 40 : -40)); save();
+  });
+}
+
+// ── 왼쪽 패널 / 본문 너비 조절 (끌거나 좌·우 화살표, 더블클릭하면 원래대로) ──
+{
+  const vs = $('vsplit'), aside = document.querySelector('aside');
+  const place = () => { const r = aside.getBoundingClientRect(); vs.style.left = r.right + 'px'; vs.style.top = r.top + 'px'; };
+  const setW = w => {
+    w = Math.max(260, Math.min(w, Math.min(640, innerWidth - 480)));
+    document.body.style.setProperty('--aside-w', w + 'px'); place(); map.invalidateSize();
+  };
+  const save = () => { try { localStorage.setItem('asideW', aside.offsetWidth); } catch(e){} };
+  try { const v = +localStorage.getItem('asideW'); if (v) setW(v); } catch(e){}
+  place(); addEventListener('resize', place);
+  vs.addEventListener('pointerdown', e => {
+    const x0 = e.clientX, w0 = aside.offsetWidth;
+    vs.setPointerCapture(e.pointerId); vs.classList.add('drag'); document.body.classList.add('resizing-x');
+    const move = ev => setW(w0 + ev.clientX - x0);
+    const up = () => { vs.removeEventListener('pointermove', move); vs.classList.remove('drag'); document.body.classList.remove('resizing-x'); save(); };
+    vs.addEventListener('pointermove', move);
+    vs.addEventListener('pointerup', up, {once:true}); vs.addEventListener('pointercancel', up, {once:true});
+  });
+  vs.addEventListener('dblclick', () => { document.body.style.removeProperty('--aside-w'); place(); map.invalidateSize(); try { localStorage.removeItem('asideW'); } catch(e){} });
+  vs.addEventListener('keydown', e => {
+    if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+    e.preventDefault(); setW(aside.offsetWidth + (e.key === 'ArrowRight' ? 40 : -40)); save();
   });
 }
 
