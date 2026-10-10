@@ -216,6 +216,8 @@ body.resizing{cursor:row-resize;user-select:none}
 .pcard .t{font-weight:700;color:var(--t1);margin-bottom:2px}
 .pcard .go{margin-top:8px;color:var(--blue);font-weight:700}
 .xlsbtn{height:38px;padding:0 14px;border:0;border-radius:10px;background:var(--fill);color:var(--t2);font-size:.84rem;font-weight:700;cursor:pointer;white-space:nowrap}
+/* 휴대폰 브라우저가 버튼 글자를 위에 붙여 그리는 일이 있어 모든 버튼의 상하·좌우 가운데 정렬을 명시한다 */
+.xlsbtn,.btn2,.detailbtn,.seg button,.rgroups button,.subctl > button,.subctl .row button,.subpick,.subpanel .bulk button,.sheet-h .x{display:inline-flex;align-items:center;justify-content:center;line-height:1;text-align:center}
 .xlsbtn:hover{background:var(--divider)}
 .xlsbtn:disabled{opacity:.5;cursor:default}
 .sub-tip{font-size:.8rem;font-weight:500}
@@ -1685,7 +1687,7 @@ function roomMix(d){
   const m = {}; d.units.forEach(u => { const k = u.bedrooms == null ? '방 수 미확인' : `방 ${u.bedrooms}개`; m[k] = (m[k]||0) + 1; });
   return Object.entries(m).sort().map(([k, v]) => `${k} ${v}호`).join(' · ');
 }
-const starText = r => r && r.stars != null ? `${'★'.repeat(r.stars)}${'☆'.repeat(5 - r.stars)} ${r.stars}/5` : '미평가';
+const starText = r => { if (!r || r.stars == null) return '미평가'; const s = Math.max(1, Math.min(5, r.stars)); return `${'★'.repeat(Math.floor(s))}${s % 1 ? '½' : ''}${'☆'.repeat(5 - Math.ceil(s))} ${s}/5${r.status === 'provisional' ? ' · 잠정' : r.status === 'excluded_by_criteria' ? ' · 조건 제외' : ''}`; };
 const matchUnits = d => RS.rooms === 'all' ? null : d.units.filter(u => u.bedrooms === +RS.rooms).length;   // 조건 일치 호실 수(필터 없으면 null)
 const hasPlan = d => d.sources.some(x => x.type === 'official_brochure');   // 공식 도면·홍보자료 링크 유무
 const structBadge = d => d.models.length ? '대표 1호실 입체 모형' : hasPlan(d) ? '3D 미제작 · 공식 도면 확인' : '구조 자료 없음';
@@ -1730,7 +1732,7 @@ function renderRent(){
   $('rSum').innerHTML = `<span>건물 <b class="num">${rows.length}</b>곳 · 모집 호실 <b class="num">${units}</b>호</span>`
     + (act.length ? act.map(a => `<span class="af">${a}</span>`).join('') + `<button type="button" class="txtbtn" id="rReset">필터 모두 해제</button>` : `<span class="rnote">기본: 모집 중·접수 예정 · 조건 부합도 높은 순(동점은 마감 빠른 순)</span>`);
   if ($('rReset')) $('rReset').onclick = () => { Object.assign(RS, {q:'', status:'active', star:'all', rooms:'all'}); $('rQ').value = ''; renderRent(); };
-  $('rNote').innerHTML = `${esc(PR.snapshot_date)} LH 공식 원문 기준 자료 · 이 화면 자료 생성 ${kst(PR.prepared_at)}. <span class="warnt">공고별 공식 확인 시각은 상세의 '공식 확인' 항목이 기준이에요.</span> 예약 수집 자동 연결 전이에요. 조건 부합도는 기준 확정 전이라 모든 후보가 미평가예요.`;
+  $('rNote').innerHTML = `${esc(PR.snapshot_date)} LH 공식 원문 기준 자료 · 이 화면 자료 생성 ${kst(PR.prepared_at)}. <span class="warnt">공고별 공식 확인 시각은 상세의 '공식 확인' 항목이 기준이에요.</span> 예약 수집 자동 연결 전이에요. 조건 부합도: Codex 평가 ${PR.candidates.filter(d => d.building.rating && d.building.rating.stars != null).length}곳 / 전체 ${PR.candidates.length}곳. 잠정 점수는 신청 자격이나 필수조건 충족을 보장하지 않아요.`;
   $('rList').innerHTML = rows.map(d => {
     const b = d.building, n = d.notice, s = rentStatus(n);
     const hasModel = d.models.length > 0;
@@ -1745,7 +1747,7 @@ function renderRent(){
           <span>전용면적</span><span class="num">${rng(b.exclusive_area_m2_range, m2)}</span>
           <span>구성</span><span>${matchUnits(d) != null ? `<b>조건 일치 ${matchUnits(d)}호</b> / 전체 ${d.units.length}호` : `${d.units.length}호`} · ${roomMix(d)}</span>
         </div>
-        <p class="why">동·호는 무작위 배정이라 특정 호실을 고를 수 없어요. 신청 자격은 개인별 확인이 필요해요.</p>
+        <p class="why">${b.rating.reason ? esc(b.rating.reason) + '<br>' : ''}동·호는 무작위 배정이라 특정 호실을 고를 수 없어요. 신청 자격은 개인별 확인이 필요해요.</p>
       </div></button>`;
   }).join('');
   $('rEmpty').hidden = rows.length > 0;
