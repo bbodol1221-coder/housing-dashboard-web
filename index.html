@@ -459,8 +459,8 @@ body.rent aside,body.rent .vsplit,body.rent .anchors,body.rent #coverage,body.re
 body.rent main{grid-column:1/-1}
 .rentview{padding:16px 24px 32px;max-width:1120px;margin:0 auto;min-width:0}
 .rnote .warnt{color:var(--warn-t);font-weight:600}
-.rbar{background:var(--surface);border-radius:20px;padding:16px 18px;box-shadow:var(--shadow);display:grid;gap:10px}
-.rbar .row{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px}
+.rbar{background:var(--surface);border-radius:20px;padding:16px 18px;box-shadow:var(--shadow);display:grid;gap:10px;min-width:0}
+.rbar .row{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;min-width:0}
 .rbar .lab{font-size:.8rem;font-weight:600;color:var(--t4);min-width:64px}
 .rbar .seg{margin:0;flex:0 1 auto}
 .rbar .seg button{padding:0 12px;height:30px;font-size:.84rem;white-space:nowrap}
@@ -524,6 +524,11 @@ body.rent main{grid-column:1/-1}
   .rbar .row.opt{display:none}
   .rbar.unfold .row.opt{display:flex}
   .rfold{display:inline-flex;margin-left:auto}
+  /* 조건 버튼 묶음이 한 줄로 고정되면 카드와 화면 밖으로 넘친다. 라벨은 위에, 버튼은 줄바꿈 */
+  .rbar .row.opt{flex-direction:column;align-items:stretch;gap:6px}
+  .rbar .lab{min-width:0}
+  .rbar .seg{flex-wrap:wrap;max-width:100%;gap:2px}
+  .rbar .seg button{flex:1 1 auto;height:32px;padding:0 10px}
   .rlist{grid-template-columns:1fr}
     .rmodel iframe{height:760px}
 }
