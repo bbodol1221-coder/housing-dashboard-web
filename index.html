@@ -207,6 +207,9 @@ body.resizing{cursor:row-resize;user-select:none}
 .pcard:hover{background:var(--fill-2)}
 .pcard .t{font-weight:700;color:var(--t1);margin-bottom:2px}
 .pcard .go{margin-top:8px;color:var(--blue);font-weight:700}
+.xlsbtn{height:38px;padding:0 14px;border:0;border-radius:10px;background:var(--fill);color:var(--t2);font-size:.84rem;font-weight:700;cursor:pointer;white-space:nowrap}
+.xlsbtn:hover{background:var(--divider)}
+.xlsbtn:disabled{opacity:.5;cursor:default}
 .sub-tip{font-size:.8rem;font-weight:500}
 .legend .ramp{display:flex;align-items:center;gap:5px;margin-top:6px;font-weight:500;color:var(--t5)}
 .legend .ramp i{width:12px;height:12px;border-radius:50%;display:inline-block}
@@ -493,6 +496,7 @@ body.loan aside .sec:not(:first-child){display:none}
       <span class="tt">조건에 맞는 단지</span><span class="ts num" id="tabSub"></span>
       <label class="search"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
         <input type="search" id="q" placeholder="단지명, 지역 검색"></label>
+      <button type="button" class="xlsbtn" id="xlsBtn" title="지금 조건·검색·정렬 그대로 모든 단지를 엑셀로 받아요">엑셀 내보내기</button>
     </div>
     <div class="tscroll">
       <table><thead><tr id="thr"></tr></thead><tbody id="tbody"></tbody></table>
@@ -872,6 +876,7 @@ function matchQ(c, q){
     return place.includes(t) || name.includes(t);
   });
 }
+let LIST = [];
 function renderTable(rows){
   $('thr').innerHTML = COLS.map(c => `<th class="${c.r?'r':''} ${SORT.key===c.k?'on':''}" data-k="${c.k}">${c.t}${SORT.key===c.k ? (SORT.dir<0?' ▼':' ▲') : ''}</th>`).join('');
   document.querySelectorAll('#thr th').forEach(th => th.onclick = () => {
@@ -881,6 +886,7 @@ function renderTable(rows){
   let list = q ? rows.filter(r => matchQ(r.c, q)) : rows;
   const g = getters[SORT.key];
   list = [...list].sort((a,b) => { const x=g(a), y=g(b); return (x>y?1:x<y?-1:0) * SORT.dir; });
+  LIST = list;   // 엑셀 내보내기용: 화면 표에 400곳만 그려도 전체 목록을 내보낸다
   $('tbody').innerHTML = list.slice(0, 400).map(r => `
     <tr data-id="${esc(r.c.id)}" class="${r.rank<=3?'top':''} ${SEL===r.c.id?'sel':''}">
       <td class="hc">${heartHTML(r.c.id)}</td><td class="r num"><span class="rpill">${r.rank}</span></td><td>${esc(r.c.name)}${officeFlag(r.c)}${overFlag(r)}${r.c.conv?'':'<span class="flag">편의 없음</span>'}</td>
@@ -1200,6 +1206,68 @@ draw(true);
     e.preventDefault(); setW(aside.offsetWidth + (e.key === 'ArrowRight' ? 40 : -40)); save();
   });
 }
+
+// ── 엑셀 내보내기: 표에 보이는 열(자세히 제외) 그대로, 조건·검색·정렬 반영, 400곳 제한 없이 ──
+function loadXLSX(){
+  if (window.XLSX) return Promise.resolve(window.XLSX);
+  return new Promise((ok, fail) => {
+    const sc = document.createElement('script');
+    sc.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+    sc.onload = () => ok(window.XLSX); sc.onerror = () => fail(new Error('엑셀 라이브러리를 불러오지 못했어요'));
+    document.head.appendChild(sc);
+  });
+}
+$('xlsBtn').onclick = async () => {
+  const btn = $('xlsBtn');
+  if (!LIST.length){ alert('내보낼 단지가 없어요.'); return; }
+  btn.disabled = true; btn.textContent = '만드는 중…';
+  try {
+    const X = await loadXLSX();
+    const I = readInputs();
+    const rows = LIST.map(r => {
+      const note = [isOffice(r.c) ? '오피스텔형' : '', r.short > 0 ? `현금 ${fmtEok(r.short)} 부족` : '', r.c.conv ? '' : '편의 정보 없음'].filter(Boolean).join(', ');
+      return {
+        '관심': FAV[r.c.id] ? '♥' : '',
+        '순위': r.rank,
+        '단지': r.c.name,
+        '비고': note,
+        '지역': `${r.c.region} ${r.c.umd}`,
+        '점수': +r.score.toFixed(1),
+        '통근 잠실(분)': Math.round(r.c.commute.jamsil.min),
+        '통근 판교(분)': Math.round(r.c.commute.pangyo.min),
+        '매매가(만원)': r.unit.price,
+        '전용(㎡)': r.unit.area,
+        '월 상환(만원)': Math.round(r.pay),
+        '평균 환승(회)': +getters.transfers(r).toFixed(1),
+        '가격 흐름(%)': r.unit.trend == null ? '' : +r.unit.trend.toFixed(1),
+        '준공': r.c.built || '',
+      };
+    });
+    const ws = X.utils.json_to_sheet(rows);
+    ws['!cols'] = Object.keys(rows[0]).map(k => ({wch: k === '단지' ? 24 : k === '지역' ? 22 : k === '비고' ? 18 : 12}));
+    ws['!autofilter'] = {ref: ws['!ref']};
+    const cond = [
+      ['내보낸 시각', new Date().toLocaleString('ko-KR')],
+      ['모아둔 돈(만원)', I.own], ['부부 합산 연소득(만원)', I.income], ['생애최초', I.first ? '예' : '아니오'],
+      ['대출 금리(%)', I.rate], ['대출 기간(년)', I.years],
+      ['지역', I.sido === 'all' ? '전체' : I.sido], ['구·시', I.gu || '전체'], ['검색어', $('q').value.trim() || '없음'],
+      ['최대 통근(분)', I.maxCommute], ['최소 전용면적(㎡)', I.minArea], ['최근 1년 거래(건 이상)', I.minDeals],
+      ['준공 연도(이후)', I.minBuilt], ['단지 규모(세대 이상)', I.minHH], ['오피스텔형 제외', I.noOffice ? '예' : '아니오'],
+      ['예산 넘는 단지도 보기', I.showOver ? '예' : '아니오'], ['월 상환 상한(만원)', isFinite(I.maxPay) ? I.maxPay : '제한 없음'],
+      ...METRICS.map(m => [`가중치: ${m.label}`, W[m.key]]),
+      ['정렬', `${(COLS.find(c => c.k === SORT.key) || {}).t || SORT.key} ${SORT.dir < 0 ? '내림차순' : '오름차순'}`],
+      ['단지 수', LIST.length],
+    ];
+    const ws2 = X.utils.aoa_to_sheet([['항목', '값'], ...cond]);
+    ws2['!cols'] = [{wch: 24}, {wch: 28}];
+    const wb = X.utils.book_new();
+    X.utils.book_append_sheet(wb, ws, '우선순위');
+    X.utils.book_append_sheet(wb, ws2, '조건');
+    const d = new Date(), ymd = `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`;
+    X.writeFile(wb, `우리집찾기_우선순위_${ymd}.xlsx`);
+  } catch(e){ alert(e.message); }
+  finally { btn.disabled = false; btn.textContent = '엑셀 내보내기'; }
+};
 
 // ── 지하철 노선도 ──
 const SUB = window.SUBWAY || {lines:[], stations:[]};
