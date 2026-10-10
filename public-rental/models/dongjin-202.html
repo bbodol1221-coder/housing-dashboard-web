@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>더클래스동진 구조 모형</title>
+<style>
+html,body{margin:0;background:transparent;color-scheme:light dark}
+#housing02 .appbar,#housing02 .listing,#housing02 .heading,#housing02 .notes{display:none!important}
+#housing02 .workspace{display:block!important}
+#housing02 .main{padding:0!important}
+#housing02{border-radius:0!important;background:transparent!important}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style></head><body>
+<div id="housing02">
+  <header class="appbar"><strong>우리 집 찾기</strong><span>공공임대 공고</span><small>02 후보 · 시제품</small></header>
+  <div class="workspace">
+    
+    <main class="main">
+      <div class="heading"><div><p class="eyebrow">집을 고르기 전에, 구조부터</p><h2>내부 공간 둘러보기</h2></div><span class="chip">202호 구조 이해용</span></div>
+      <section id="h02-model" aria-label="입체 구조">
+        <div class="viewer">
+          <div class="viewer-caption"><span>202호 · 방 3개</span><span>드래그로 회전</span></div>
+          <svg id="h02-scene" role="img" aria-label="202호 공식 평면도를 참고한 입체 구조 모형. 거실과 주방 앞에 침실 3개가 배치되어 있습니다."></svg>
+          <div class="viewer-bottom"><span>공식 도면 참고 · 비례·층고·가구는 추정</span><button type="button" id="h02-tour">동선 따라보기</button></div>
+        </div>
+        <div class="controls">
+          <label>회전 <input id="h02-angle" type="range" min="-180" max="180" value="-32"><output id="h02-angle-label">−32°</output></label>
+          <label>시점 <select id="h02-view"><option value="iso">비스듬히 보기</option><option value="top">위에서 보기</option></select></label>
+          <label class="check"><input id="h02-furniture" type="checkbox" checked> 가구 배치 예시</label>
+          <button type="button" id="h02-wall" aria-pressed="false">벽 높여보기</button>
+        </div>
+        <div class="roomlist" aria-label="공간 선택">
+          <button type="button" data-room="living" aria-pressed="true">거실</button><button type="button" data-room="kitchen" aria-pressed="false">주방</button><button type="button" data-room="entry" aria-pressed="false">현관</button><button type="button" data-room="bed1" aria-pressed="false">침실 1</button><button type="button" data-room="bed2" aria-pressed="false">침실 2</button><button type="button" data-room="bed3" aria-pressed="false">침실 3</button><button type="button" data-room="bath" aria-pressed="false">욕실</button>
+        </div>
+        <div class="detail" aria-live="polite"><strong id="h02-room-title">거실</strong><p id="h02-room-desc">주방과 이어지는 공용 공간입니다. 소파와 식탁은 배치를 가늠하기 위한 예시이며, 제공 옵션이 아닙니다.</p></div>
+      </section>
+      <footer class="notes"><strong>자료와 모형의 차이</strong><p>LH 2025년 홍보자료의 2층 평면도를 참고했습니다. 벽·문의 위치와 공간 연결을 단순화했으며, 층고·가구·실내 마감은 표현용 가정입니다. 실측·설계·시공용 도면이 아닙니다.</p><div><span>공식 자료: 2025년</span><span>현재 상태·관리비·채광: 현장 확인 필요</span></div></footer>
+    </main>
+  </div>
+</div>
+<style>
+#housing02{--h-bg:light-dark(#f2f4f6,#101013);--h-paper:light-dark(#fff,#1c1c21);--h-ink:light-dark(#191f28,#fff);--h-muted:light-dark(#6b7684,#9e9ea4);--h-line:light-dark(#e5e8eb,#34343d);--h-blue:light-dark(#3182f6,#449bff);--h-soft:light-dark(#e8f3ff,#1d2a3d);--h-warn:light-dark(#9c5500,#f0b35c);--h-floor:light-dark(#e5d8c4,#756b5c);--h-room:light-dark(#efe5d5,#887c6b);--h-wet:light-dark(#d8e2e6,#626e78);--h-wall:light-dark(#faf9f4,#d2d3ce);--h-side:light-dark(#d8d8d1,#969a99);--h-furn:light-dark(#b8c2c7,#8e9caa);font:14px/1.6 -apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Noto Sans KR',sans-serif;color:var(--h-ink);background:var(--h-bg);border-radius:16px;overflow:hidden;color-scheme:light dark}
+#housing02 *{box-sizing:border-box}#housing02 [hidden]{display:none!important}#housing02 h1,#housing02 h2,#housing02 h3,#housing02 p{margin:0}#housing02 h1{font-size:24px;letter-spacing:-.8px}#housing02 h2{font-size:23px;letter-spacing:-.6px}#housing02 h3{font-size:16px}#housing02 button,#housing02 select{font:inherit;color:var(--h-ink);background:var(--h-paper);border:1px solid var(--h-line);border-radius:9px;padding:8px 12px;cursor:pointer}#housing02 button:hover{border-color:var(--h-blue)}#housing02 button[aria-pressed=true],#housing02 button[aria-selected=true]{background:var(--h-soft);border-color:var(--h-blue);color:var(--h-blue)}#housing02 a{color:var(--h-blue);text-decoration:none}#housing02 .appbar{padding:18px 24px;background:var(--h-paper);border-bottom:1px solid var(--h-line);display:flex;gap:26px;align-items:center;flex-wrap:wrap}#housing02 .appbar strong{font-size:18px}#housing02 .appbar span{color:var(--h-blue)}#housing02 .appbar small{margin-left:auto;color:var(--h-muted);padding-right:68px}#housing02 .workspace{display:grid;grid-template-columns:245px minmax(0,1fr)}#housing02 .listing{padding:26px 22px;background:var(--h-paper);border-right:1px solid var(--h-line)}#housing02 .eyebrow{color:var(--h-muted);font-size:12px;margin-bottom:7px}#housing02 .address{margin:9px 0 18px;color:var(--h-muted)}#housing02 .building{width:100%;height:140px;object-fit:cover;border-radius:10px;margin-bottom:14px}#housing02 .fact{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--h-line);flex-wrap:wrap}#housing02 .fact span{font-size:12px;color:var(--h-muted)}#housing02 .fact strong{font-size:14px;font-weight:500}#housing02 .warning{color:var(--h-warn);font-size:12px;margin:17px 0}#housing02 .stamp{display:block;color:var(--h-muted);font-size:11px;margin-top:22px}#housing02 .main{min-width:0;padding:26px}#housing02 .heading{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}#housing02 .chip{background:var(--h-paper);border-radius:20px;padding:6px 11px;font-size:11px;color:var(--h-muted)}#housing02 .tabs{display:flex;gap:8px;margin:20px 0 14px}#housing02 .viewer{margin-top:20px;background:var(--h-paper);border-radius:16px;overflow:hidden}#housing02 .viewer-caption,#housing02 .viewer-bottom{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:15px 18px;font-size:12px;flex-wrap:wrap}#housing02 .viewer-caption span:last-child,#housing02 .viewer-bottom span{color:var(--h-muted)}#housing02 #h02-scene{width:100%;height:360px;display:block;touch-action:pan-y;cursor:grab}#housing02 #h02-scene:active{cursor:grabbing}#housing02 .controls{display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin:17px 0;font-size:12px}#housing02 .controls label{display:flex;align-items:center;gap:7px}#housing02 .controls input[type=range]{width:112px;accent-color:var(--h-blue)}#housing02 .controls output{min-width:34px}#housing02 .controls select{padding:6px;font-size:12px}#housing02 .controls input[type=checkbox]{accent-color:var(--h-blue)}#housing02 .roomlist{display:flex;gap:7px;flex-wrap:wrap}#housing02 .roomlist button{font-size:12px;padding:7px 12px}#housing02 .detail{padding:17px 0 20px;display:flex;gap:14px;align-items:baseline}#housing02 .detail strong{white-space:nowrap;font-size:14px}#housing02 .detail p{color:var(--h-muted);font-size:12px}#housing02 .notes{border-top:1px solid var(--h-line);padding-top:17px;font-size:12px;color:var(--h-muted)}#housing02 .notes strong{color:var(--h-ink);font-weight:500}#housing02 .notes p{margin:7px 0 10px}#housing02 .notes div{display:flex;gap:20px;flex-wrap:wrap;font-size:11px}#housing02 .planheading{display:flex;gap:12px;justify-content:space-between;flex-wrap:wrap;margin:20px 0}#housing02 .unit-plan{display:block;width:100%;max-height:380px;object-fit:contain;background:white;border-radius:12px}#housing02 details{margin:18px 0}#housing02 summary{cursor:pointer}#housing02 .full-plan{width:100%;max-height:700px;object-fit:contain;margin-top:12px;background:white}#housing02 #h02-scene text{fill:var(--h-ink);paint-order:stroke;stroke:var(--h-paper);stroke-width:4;stroke-linejoin:round;font:12px -apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo',sans-serif;pointer-events:none}
+@media(max-width:760px){#housing02 .workspace{grid-template-columns:1fr}#housing02 .listing{border-right:0;border-bottom:1px solid var(--h-line);display:grid;grid-template-columns:1fr 1fr;gap:8px 18px;padding:20px}#housing02 .listing h1,#housing02 .listing .eyebrow,#housing02 .listing .address{grid-column:1}#housing02 .building{grid-column:2;grid-row:1/4;height:145px;margin:0}#housing02 .fact{padding:7px 0}#housing02 .warning,#housing02 .source,#housing02 .stamp{grid-column:1/-1;margin:6px 0}#housing02 .main{padding:20px}#housing02 .appbar small{padding-right:0}#housing02 #h02-scene{height:320px}#housing02 .detail{display:block}#housing02 .detail p{margin-top:5px}}
+@media(max-width:380px){#housing02 .listing{display:block}#housing02 .building{height:120px;margin:12px 0}#housing02 .main{padding:14px}#housing02 .appbar{padding:14px;gap:12px}#housing02 #h02-scene{height:280px}#housing02 .controls label{flex-wrap:wrap}#housing02 button{min-height:40px}}
+</style>
+<script>
+(()=>{
+const root=document.getElementById('housing02'),q=s=>root.querySelector(s),svg=q('#h02-scene');
+const rooms=[
+{id:'living',name:'거실',x:0,y:0,w:4.8,d:3.2,desc:'주방과 이어지는 공용 공간입니다. 소파와 식탁은 배치를 가늠하기 위한 예시이며, 제공 옵션이 아닙니다.'},
+{id:'kitchen',name:'주방',x:4.8,y:0,w:2.72,d:3.2,desc:'거실과 연결된 주방입니다. 조리대와 수납장 형상은 단순화했습니다. 실제 가전 설치 공간과 옵션은 확인이 필요합니다.'},
+{id:'entry',name:'현관',x:7.52,y:0,w:2.98,d:3.2,desc:'공용 복도에서 들어와 거실·주방으로 연결되는 부분입니다. 현관 문과 신발장의 정확한 위치·폭은 원본 및 현장에서 재확인해야 합니다.'},
+{id:'bed1',name:'침실 1',x:0,y:3.2,w:2.95,d:3.4,desc:'도면 왼쪽의 침실입니다. 침대 배치는 예시이며, 붙박이장·가구 사이 통로와 창 앞 여유는 실측하지 않았습니다.'},
+{id:'bath',name:'욕실',x:2.95,y:3.2,w:1.85,d:3.4,desc:'침실 사이에 위치한 욕실 영역입니다. 설비·문짝·샤워 공간은 간략 표현이며, 정확한 내부 배치는 공식 도면을 확인해 주세요.'},
+{id:'bed2',name:'침실 2',x:4.8,y:3.2,w:2.72,d:3.4,desc:'도면 가운데 침실입니다. 서재 또는 침실 배치를 가늠하는 예시입니다. 방별 면적과 가구 설치 가능 여부는 미확인입니다.'},
+{id:'bed3',name:'침실 3',x:7.52,y:3.2,w:2.98,d:3.4,desc:'공용 복도 쪽 침실입니다. 소음·채광·창문 방향은 입체 모형으로 판정할 수 없으며 현장 확인이 필요합니다.'}
+];
+let angle=-32,tilt=.57,wallHeight=.65,selected='living',furniture=true,animation=0,tourStep=0;
+const NS='http://www.w3.org/2000/svg';
+function el(tag,attrs,parent=svg){const n=document.createElementNS(NS,tag);Object.entries(attrs).forEach(([k,v])=>n.setAttribute(k,v));parent.append(n);return n}
+function render(){
+ const W=svg.clientWidth||600,H=svg.clientHeight||360;svg.setAttribute('viewBox',`0 0 ${W} ${H}`);svg.replaceChildren();
+ const a=angle*Math.PI/180,c=Math.cos(a),s=Math.sin(a),ct=Math.cos(tilt),st=Math.sin(tilt);
+ const points=[];for(const x of [-.35,10.85])for(const y of [-.35,6.95])for(const z of [-.22,wallHeight]){const u=x-5.25,v=y-3.3;points.push([u*c-v*s,(u*s+v*c)*st-z*ct])}
+ const minX=Math.min(...points.map(p=>p[0])),maxX=Math.max(...points.map(p=>p[0])),minY=Math.min(...points.map(p=>p[1])),maxY=Math.max(...points.map(p=>p[1]));
+ const scale=Math.min((W-60)/(maxX-minX),(H-55)/(maxY-minY));
+ function proj(p){const u=p[0]-5.25,v=p[1]-3.3;return [W/2+(u*c-v*s)*scale,H/2+((u*s+v*c)*st-p[2]*ct-(minY+maxY)/2)*scale]}
+ function depth(p){return (p[0]*s+p[1]*c)*ct+p[2]*st}
+ const faces=[];
+ function face(pts,color,id,stroke='var(--h-line)'){faces.push({pts,color,id,stroke,depth:pts.reduce((v,p)=>v+depth(p),0)/pts.length})}
+ function box(x,y,w,d,z,h,color,side='var(--h-side)',id=''){
+  const p=[[x,y,z],[x+w,y,z],[x+w,y+d,z],[x,y+d,z]],t=p.map(v=>[v[0],v[1],z+h]);
+  for(let i=0;i<4;i++){let j=(i+1)%4;face([p[i],p[j],t[j],t[i]],side,id)}face(t,color,id)
+ }
+ box(-.16,-.16,10.82,6.92,-.22,.2,'var(--h-floor)');
+ rooms.forEach(r=>box(r.x,r.y,r.w,r.d,0,.025,r.id===selected?'var(--h-soft)':r.id==='bath'?'var(--h-wet)':'var(--h-room)','var(--h-side)',r.id));
+ for(let y=.4;y<6.6;y+=.42)face([[0,y,.027],[10.5,y,.027],[10.5,y+.012,.027],[0,y+.012,.027]],'var(--h-floor)');
+ // Low cutaway walls; door gaps simplified from the official plan.
+ const h=wallHeight;
+ box(-.08,0,.12,6.6,.03,h,'var(--h-wall)');box(0,6.54,10.5,.12,.03,h,'var(--h-wall)');
+ box(10.44,0,.12,1.5,.03,h,'var(--h-wall)');box(10.44,2.45,.12,4.15,.03,h,'var(--h-wall)');
+ box(0,-.06,10.5,.12,.03,h,'var(--h-wall)');
+ [[0,1.8],[2.65,1.55],[4.8,1.72],[7.52,1.98]].forEach(([x,w])=>box(x,3.14,w,.12,.03,h,'var(--h-wall)'));
+ [2.95,4.8,7.52].forEach(x=>box(x-.06,3.2,.12,3.4,.03,h,'var(--h-wall)'));
+ // Windows: reference openings, not surveyed orientation or sizes.
+ [0.45,5.2,8.05].forEach(x=>box(x,6.52,1.6,.16,.28,.30,'var(--h-soft)','var(--h-furn)'));
+ if(furniture){
+  box(.35,.40,2.45,.85,.05,.42,'var(--h-furn)');box(.35,.40,2.45,.22,.47,.33,'var(--h-furn)');
+  box(1.0,1.65,1.45,.65,.03,.30,'var(--h-wall)');box(3.3,.18,1.2,.18,.03,.6,'var(--h-furn)');
+  box(5,.18,2.1,.65,.03,.60,'var(--h-wall)');box(6.6,.2,.6,1.9,.03,.60,'var(--h-wall)');box(5.6,1.65,.65,.65,.03,.60,'var(--h-furn)');
+  box(.40,4.35,1.65,1.9,.03,.28,'var(--h-wall)');box(.45,5.9,1.55,.33,.31,.09,'var(--h-furn)');
+  box(5.03,4.75,1.15,1.65,.03,.28,'var(--h-wall)');box(5.08,6.0,1.05,.28,.31,.08,'var(--h-furn)');box(6.4,4.2,.85,.50,.03,.48,'var(--h-furn)');
+  box(7.82,4.35,1.45,1.9,.03,.28,'var(--h-wall)');box(7.87,5.9,1.35,.30,.31,.08,'var(--h-furn)');
+  box(3.1,5.5,1.5,.85,.03,.1,'var(--h-wet)');box(3.1,3.5,.65,.6,.03,.5,'var(--h-wall)');
+  box(8.15,.2,1.8,.45,.03,.72,'var(--h-wall)');
+ }
+ faces.sort((a,b)=>a.depth-b.depth).forEach(f=>{const polygon=el('polygon',{points:f.pts.map(p=>proj(p).map(x=>x.toFixed(2)).join(',')).join(' '),fill:f.color,stroke:f.stroke,'stroke-width':.65,'stroke-linejoin':'round'});if(f.id){polygon.dataset.room=f.id;polygon.style.cursor='pointer';polygon.addEventListener('click',()=>choose(f.id))}});
+ rooms.forEach(r=>{const p=proj([r.x+r.w/2,r.y+r.d/2,.85]);const text=el('text',{x:p[0],y:p[1],'text-anchor':'middle'});text.textContent=r.name;});
+ q('#h02-angle-label').textContent=Math.round(angle)+'°';q('#h02-angle').value=Math.round(angle);
+}
+function choose(id){selected=id;const r=rooms.find(r=>r.id===id);q('#h02-room-title').textContent=r.name;q('#h02-room-desc').textContent=r.desc;root.querySelectorAll('[data-room]').forEach(b=>{if(b.tagName==='BUTTON')b.setAttribute('aria-pressed',String(b.dataset.room===id))});render()}
+function stop(){cancelAnimationFrame(animation);animation=0;q('#h02-tour').textContent='동선 따라보기'}
+function moveTo(target,duration=500){cancelAnimationFrame(animation);const start=angle,t=performance.now();const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;function frame(now){const f=reduced?1:Math.min(1,(now-t)/duration);angle=start+(target-start)*(1-Math.pow(1-f,3));render();if(f<1)animation=requestAnimationFrame(frame)}animation=requestAnimationFrame(frame)}
+q('#h02-angle').oninput=e=>{stop();angle=+e.target.value;render()};q('#h02-view').onchange=e=>{stop();tilt=e.target.value==='top'?Math.PI/2:.57;render()};q('#h02-furniture').onchange=e=>{furniture=e.target.checked;render()};q('#h02-wall').onclick=e=>{const high=e.currentTarget.getAttribute('aria-pressed')!=='true';e.currentTarget.setAttribute('aria-pressed',high);e.currentTarget.textContent=high?'벽 낮춰보기':'벽 높여보기';wallHeight=high?1.65:.65;render()};
+root.querySelectorAll('.roomlist button').forEach(b=>b.onclick=()=>{stop();choose(b.dataset.room)});
+const route=['entry','living','kitchen','bed1','bed2','bed3'];q('#h02-tour').onclick=()=>{choose(route[tourStep%route.length]);moveTo(-32+(tourStep%route.length)*13);tourStep++;q('#h02-tour').textContent=tourStep%route.length===0?'처음부터 둘러보기':`다음 공간 (${tourStep%route.length}/6)`};
+let drag=null,moved=false;svg.onpointerdown=e=>{stop();drag={x:e.clientX,a:angle,room:e.target.dataset.room};moved=false;svg.setPointerCapture(e.pointerId)};svg.onpointermove=e=>{if(!drag)return;const dx=e.clientX-drag.x;if(Math.abs(dx)>4)moved=true;angle=Math.max(-180,Math.min(180,drag.a+dx*.45));render()};svg.onpointerup=()=>{const hit=drag&&!moved?drag.room:null;drag=null;if(hit)choose(hit)};svg.onpointercancel=()=>{drag=null};
+new ResizeObserver(()=>render()).observe(svg);render();
+if(globalThis.Tweak){const style={height:360};const tweak=new Tweak({container:q('.viewer'),onChange:()=>{svg.style.height=style.height+'px';render()}});tweak.addSlider(style,'height',{label:'입체 화면 높이',min:280,max:480,step:20,unit:'px'})}
+})();
+</script>
+
+</body></html>

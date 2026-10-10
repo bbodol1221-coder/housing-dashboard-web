@@ -121,6 +121,7 @@ aside{background:var(--surface);overflow-y:auto;border-top:1px solid var(--divid
 .budget .sm b{color:var(--t2);font-weight:600}
 .budget .pair{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .budget .foot{margin-top:12px;font-size:.74rem;color:var(--t5);line-height:1.5}
+.budget .foot b{color:var(--t3)}
 .wrow{display:grid;grid-template-columns:60px 1fr 40px;align-items:center;gap:10px;min-height:38px;font-size:.9rem;color:var(--t3)}
 .wrow .wv{text-align:right;font-weight:600;color:var(--t1)}
 input[type=range]{appearance:none;height:4px;border-radius:2px;background:var(--fill);outline:none;width:100%}
@@ -132,6 +133,7 @@ input[type=range]{background:linear-gradient(var(--blue),var(--blue)) 0/var(--p,
 .hint{font-size:.78rem;color:var(--t5);line-height:1.6;margin-top:10px}
 
 /* ── 본문 ── */
+.mbar{display:none}
 main{min-height:0;overflow-y:auto}
 .top3{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(270px,1fr);gap:12px;padding:16px 20px;overflow-x:auto}
 .card{background:var(--surface);border-radius:20px;padding:18px 20px;cursor:pointer;box-shadow:var(--shadow);
@@ -147,6 +149,7 @@ main{min-height:0;overflow-y:auto}
 .card .score small{font-size:.85rem;font-weight:600;color:var(--t5);margin-left:2px}
 .card .kv{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:.84rem;margin:12px 0}
 .card .kv span:nth-child(odd){color:var(--t5)}
+.est{font-size:.68rem;font-weight:600;color:var(--warn-t);background:var(--warn-soft);border-radius:5px;padding:1px 5px;margin-left:2px;white-space:nowrap}
 .card .kv span:nth-child(even){color:var(--t2);font-weight:500}
 .why{display:inline-block;font-size:.8rem;font-weight:600;color:var(--blue-soft-t);background:var(--blue-soft);
   border-radius:8px;padding:6px 10px;margin-bottom:12px}
@@ -156,6 +159,11 @@ main{min-height:0;overflow-y:auto}
 .contrib .v{text-align:right;color:var(--t3);font-weight:600}
 .robust{margin-top:12px;padding-top:12px;border-top:1px solid var(--divider);font-size:.78rem;color:var(--t4);display:flex;justify-content:space-between}
 .robust b{color:var(--t1);font-weight:700}
+.robust small{font-weight:500;color:var(--t5)}
+.card details.more summary{cursor:pointer;font-size:.78rem;font-weight:600;color:var(--t4);list-style:none;display:flex;align-items:center;gap:6px;margin-bottom:8px;user-select:none}
+.card details.more summary::before{content:'▸';font-size:.7rem;transition:transform .15s}
+.card details.more[open] summary::before{transform:rotate(90deg)}
+.card details.more summary::-webkit-details-marker{display:none}
 .cmt{white-space:nowrap}
 .cmt .cj,.cmt .cp{font-weight:700;color:var(--t1)}
 .cmt .lb{font-size:.72rem;font-weight:600;margin-right:2px}
@@ -237,11 +245,19 @@ body.resizing{cursor:row-resize;user-select:none}
 .search input{flex:1;border:0;background:transparent;outline:none;font-size:.86rem}
 .search input::placeholder{color:var(--t5)}
 .search svg{flex:0 0 16px;color:var(--t5)}
+.afbar{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:0 20px 10px;font-size:.8rem;color:var(--t4)}
+.afbar:empty{display:none}
+.afbar .af{display:inline-flex;align-items:center;gap:4px;height:26px;padding:0 4px 0 9px;border-radius:13px;background:var(--blue-soft);color:var(--blue-soft-t);font-size:.76rem;font-weight:600}
+.afbar .af button{all:unset;cursor:pointer;width:18px;height:18px;border-radius:9px;display:inline-flex;align-items:center;justify-content:center;font-size:.72rem;color:inherit}
+.afbar .af button:hover{background:rgba(0,0,0,.08)}
+.afbar .af button:focus-visible{outline:2px solid var(--blue)}
 .tscroll{flex:1;overflow:auto}
 table{width:100%;border-collapse:collapse;font-size:.86rem}
 thead th{position:sticky;top:0;background:var(--surface);text-align:left;padding:8px 12px;font-size:.78rem;font-weight:600;
   color:var(--t5);white-space:nowrap;border-bottom:1px solid var(--divider);cursor:pointer;user-select:none}
 thead th.on{color:var(--t1)}
+.thb{all:unset;cursor:pointer;font:inherit;color:inherit;border-radius:6px;padding:2px 4px;margin:-2px -4px}
+.thb:focus-visible{outline:2px solid var(--blue);outline-offset:1px}
 th.r,td.r{text-align:right}
 tbody td{padding:12px;white-space:nowrap;color:var(--t2)}
 tbody td:nth-child(2){font-weight:600;color:var(--t1)}
@@ -362,7 +378,7 @@ td.hc{width:36px;padding:6px 0 6px 10px}
 .empty-fav{padding:60px 20px;text-align:center;color:var(--t5);line-height:1.8}
 
 /* ── 대출 계산 탭 ── */
-.viewseg{width:220px;margin:0}
+.viewseg{width:330px;margin:0}
 .viewseg button{height:30px;font-size:.84rem}
 main.loan > :not(#loanView){display:none}
 main:not(.loan) > #loanView{display:none}
@@ -423,6 +439,93 @@ body.loan aside .sec:not(:first-child){display:none}
   .tscroll{max-height:70vh}
   .search{width:100%;margin-left:0}
   .tabhead{flex-wrap:wrap}
+  .afbar{padding:0 16px 10px}
+  /* 모바일: 조건 패널은 접어 두고 결과부터 보인다. 막대는 화면 위에 고정 */
+  .mbar{display:flex;position:sticky;top:0;z-index:1500;align-items:center;gap:8px;padding:10px 16px;background:var(--surface);border-top:1px solid var(--divider);border-bottom:1px solid var(--divider)}
+  .mbar .mn{flex:1;min-width:0;font-size:.86rem;color:var(--t3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .mbar .mn b{color:var(--t1)}
+  .mbar .xlsbtn{height:34px;padding:0 12px;font-size:.8rem}
+  .mbar .xlsbtn[aria-expanded="true"]{background:var(--blue);color:#fff}
+  aside{display:none}
+  body.cond-open aside{display:block}
+  body.rent .mbar{display:none}
+  body.loan .mbar .mn,body.loan #mbarList{display:none}
+}
+/* ── 공공임대 후보 탭 ── */
+main.rent > :not(#rentView){display:none}
+main:not(.rent) > #rentView{display:none}
+body.rent{grid-template-columns:1fr}
+body.rent aside,body.rent .vsplit,body.rent .anchors,body.rent #coverage,body.rent #favOpen{display:none}
+body.rent main{grid-column:1/-1}
+.rentview{padding:16px 24px 32px;max-width:1120px;margin:0 auto;min-width:0}
+.rnote .warnt{color:var(--warn-t);font-weight:600}
+.rbar{background:var(--surface);border-radius:20px;padding:16px 18px;box-shadow:var(--shadow);display:grid;gap:10px}
+.rbar .row{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px}
+.rbar .lab{font-size:.8rem;font-weight:600;color:var(--t4);min-width:64px}
+.rbar .seg{margin:0;flex:0 1 auto}
+.rbar .seg button{padding:0 12px;height:30px;font-size:.84rem;white-space:nowrap}
+.rbar .search{margin-left:0;width:260px}
+.rsum{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;font-size:.84rem;color:var(--t3);padding-top:4px;border-top:1px solid var(--divider)}
+.rsum b{color:var(--t1)}
+.rsum .af{display:inline-flex;align-items:center;height:24px;padding:0 9px;border-radius:12px;background:var(--blue-soft);color:var(--blue-soft-t);font-size:.76rem;font-weight:600}
+.rnote{font-size:.76rem;color:var(--t5);line-height:1.6}
+.rfold{display:none}
+.rlist{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px;margin-top:12px}
+.rcard{background:var(--surface);border-radius:20px;box-shadow:var(--shadow);overflow:hidden;display:flex;flex-direction:column;cursor:pointer;border:0;text-align:left;font:inherit;color:inherit;padding:0}
+.rcard:hover{box-shadow:var(--shadow-hi)}
+.rcard .bd{padding:14px 16px 16px;display:grid;gap:8px}
+.rcard h3{font-size:1.08rem;font-weight:700;letter-spacing:-.02em}
+.rcard .sub{font-size:.8rem;color:var(--t4)}
+.rkv{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:.84rem}
+.rkv span:nth-child(odd){color:var(--t5)}
+.rkv span:nth-child(even){color:var(--t1);font-weight:600}
+.badges{display:flex;flex-wrap:wrap;gap:6px}
+.bdg{display:inline-flex;align-items:center;height:24px;padding:0 9px;border-radius:8px;font-size:.75rem;font-weight:700;background:var(--fill);color:var(--t3)}
+.bdg.sch{background:var(--blue-soft);color:var(--blue-soft-t)}
+.bdg.open{background:var(--good-soft);color:var(--good-t)}
+.bdg.past{background:var(--fill);color:var(--t5)}
+.bdg.warn{background:var(--warn-soft);color:var(--warn-t)}
+.rcard .why{font-size:.8rem;color:var(--t4);line-height:1.5}
+.rdetail{display:grid;gap:12px;min-width:0}
+.rdetail[hidden],#rentList[hidden]{display:none}
+.rdetail>*{min-width:0}
+.rsec{min-width:0}
+.rback{display:inline-flex;align-items:center;gap:6px;height:38px;padding:0 14px;border:0;border-radius:10px;background:var(--surface);box-shadow:var(--shadow);font-size:.88rem;font-weight:700;cursor:pointer;justify-self:start}
+.rsec{background:var(--surface);border-radius:20px;padding:20px 22px;box-shadow:var(--shadow)}
+.rsec h2{font-size:1.25rem;font-weight:700;letter-spacing:-.03em}
+.rsec h3{font-size:1rem;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.rsec h3 small{font-size:.76rem;color:var(--t5);font-weight:500}
+.rsec p,.rsec li{font-size:.86rem;color:var(--t3);line-height:1.6}
+.rsec ul{padding-left:18px}
+.rwarn{background:var(--warn-soft);color:var(--warn-t);border-radius:12px;padding:10px 12px;font-size:.84rem;font-weight:600;line-height:1.5}
+.rgroups{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.rgroups button{height:34px;padding:0 12px;border-radius:10px;border:0;background:var(--fill);font-size:.84rem;font-weight:600;color:var(--t3);cursor:pointer}
+.rgroups button[aria-pressed="true"]{background:var(--blue);color:#fff}
+.utable{width:100%;font-size:.84rem}
+.utable th{position:static;text-align:right;font-size:.76rem;color:var(--t5);font-weight:600;padding:6px 8px;border-bottom:1px solid var(--divider);background:transparent}
+.utable td{text-align:right;padding:8px;border-bottom:1px solid var(--divider)}
+.utable th:first-child,.utable td:first-child{text-align:left}
+.utable tr[aria-selected="true"] td{background:var(--blue-soft)}
+.utable tbody tr{cursor:pointer}
+.utwrap{overflow:auto;max-height:340px;max-width:100%;-webkit-overflow-scrolling:touch}
+.utable thead th{position:sticky;top:0;background:var(--surface);z-index:1}
+.rmodel{margin-top:12px}
+.rmodel{min-width:0}
+.rmodel:focus-visible{outline:2px solid var(--blue);outline-offset:4px;border-radius:14px}
+.rmodel iframe{width:100%;max-width:100%;height:680px;border:0;border-radius:14px;background:var(--fill-2)}
+.rnomodel{padding:18px;border-radius:12px;background:var(--fill-2);font-size:.86rem;color:var(--t4);line-height:1.6}
+.rlinks{display:flex;flex-wrap:wrap;gap:8px}
+.rlinks a{display:inline-flex;align-items:center;height:34px;padding:0 12px;border-radius:10px;background:var(--fill);color:var(--t2);font-size:.82rem;font-weight:600;text-decoration:none}
+.rlinks a:hover{background:var(--divider)}
+@media (max-width:900px){
+  .rentview{padding:12px 16px 24px}
+  .rbar .search{flex:1;min-width:0;width:auto}
+  .rbar .row:first-child{flex-wrap:nowrap}
+  .rbar .row.opt{display:none}
+  .rbar.unfold .row.opt{display:flex}
+  .rfold{display:inline-flex;margin-left:auto}
+  .rlist{grid-template-columns:1fr}
+    .rmodel iframe{height:760px}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none !important}}
 </style>
@@ -431,7 +534,7 @@ body.loan aside .sec:not(:first-child){display:none}
 <header>
   <h1>우리 집 찾기</h1>
   <div class="seg viewseg" id="viewSeg" role="tablist" aria-label="보기">
-    <button type="button" data-v="find" class="on" role="tab">단지 찾기</button><button type="button" data-v="loan" role="tab">대출 계산</button>
+    <button type="button" data-v="find" class="on" role="tab">단지 찾기</button><button type="button" data-v="loan" role="tab">대출 계산</button><button type="button" data-v="rent" role="tab">공공임대 후보</button>
   </div>
   <div class="anchors">
     <span class="chip"><span class="dot j"></span>잠실 통근</span>
@@ -440,8 +543,13 @@ body.loan aside .sec:not(:first-child){display:none}
   <span class="coverage" id="coverage"></span>
   <button class="favbtn" id="favOpen" type="button">관심 단지 <b id="favCount" class="num">0</b></button>
 </header>
+<div class="mbar" id="mbar">
+  <span class="mn">조건에 맞는 단지 <b id="mbarN" class="num"></b></span>
+  <button type="button" class="xlsbtn" id="mbarList">전체 목록</button>
+  <button type="button" class="xlsbtn" id="mbarCond" aria-expanded="false" aria-controls="aside">조건 펼치기</button>
+</div>
 
-<aside>
+<aside id="aside">
   <section class="sec">
     <h2>예산</h2>
     <div class="field"><label for="own">모아둔 돈</label><span class="box"><input type="number" id="own" value="15000" step="1000"><span class="u">만원</span></span></div>
@@ -449,11 +557,11 @@ body.loan aside .sec:not(:first-child){display:none}
     <label class="switch">생애최초 주택 구입<input type="checkbox" id="first" checked></label>
     <div class="field"><label for="rate">대출 금리</label><span class="box"><input type="number" id="rate" value="4.0" step="0.1"><span class="u">%</span></span></div>
     <div class="field"><label for="years">대출 기간</label><span class="box"><input type="number" id="years" value="30" step="5"><span class="u">년</span></span></div>
-    <div class="budget" id="budgetbox"></div>
+    <div class="budget"><div class="bl" style="margin-bottom:6px">예상 구매 가능액 <span style="color:var(--warn-t);font-weight:600">추정</span></div><div id="budgetbox"></div></div>
   </section>
 
   <section class="sec">
-    <h2>조건</h2>
+    <h2>조건 <button class="txtbtn" id="resetF" title="지역·통근·면적 등 조건만 기본값으로 되돌려요. 예산·가중치·관심 단지는 그대로예요">조건 초기화</button></h2>
     <div class="seg" id="sidoSeg" role="group" aria-label="지역">
       <button type="button" data-v="all" class="on">전체</button><button type="button" data-v="서울">서울</button><button type="button" data-v="경기">경기</button>
     </div>
@@ -469,7 +577,7 @@ body.loan aside .sec:not(:first-child){display:none}
   </section>
 
   <section class="sec">
-    <h2>무엇이 더 중요한가요? <button class="txtbtn" id="resetW">기본값</button></h2>
+    <h2>무엇이 더 중요한가요? <button class="txtbtn" id="resetW" title="아래 가중치만 기본값으로 되돌려요. 조건·관심 단지는 그대로예요">가중치 초기화</button></h2>
     <div id="weights"></div>
     <p class="hint">통근 점수는 두 사람 통근시간의 평균과 더 긴 쪽을 반반 섞어요. 한 사람만 오래 걸리는 집은 점수가 깎여요.</p>
     <p class="hint">평수 점수는 예산 안에서 살 수 있는 가장 넓은 평형의 전용면적이 넓을수록 높아요.</p>
@@ -498,6 +606,7 @@ body.loan aside .sec:not(:first-child){display:none}
         <input type="search" id="q" placeholder="단지명, 지역 검색"></label>
       <button type="button" class="xlsbtn" id="xlsBtn" title="지금 조건·검색·정렬 그대로 모든 단지를 엑셀로 받아요">엑셀 내보내기</button>
     </div>
+    <div class="afbar" id="afbar" role="status" aria-label="적용 중인 조건"></div>
     <div class="tscroll">
       <table><thead><tr id="thr"></tr></thead><tbody id="tbody"></tbody></table>
       <div class="empty" id="empty" hidden>조건에 맞는 단지가 없어요. 최대 통근 시간이나 예산을 넓혀 보세요.</div>
@@ -518,6 +627,28 @@ body.loan aside .sec:not(:first-child){display:none}
     <div class="lcard"><h3>얼마까지 빌릴 수 있나요? <small>세 한도 중 가장 낮은 값까지</small></h3><div id="lLimits"></div></div>
     <div class="lcard"><h3>모아둔 돈으로 살 수 있는 가장 비싼 집 <small>누르면 위 집값에 넣어요</small></h3><div class="lmax" id="lMax"></div></div>
     <div class="lcard ychart"><h3>해마다 갚는 돈 <small>원금과 이자</small></h3><div id="lChart"></div></div>
+  </section>
+  <section class="rentview" id="rentView" aria-label="공공임대 후보">
+    <div id="rentList">
+      <div class="rbar" id="rBar">
+        <div class="row">
+          <label class="search"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+            <input type="search" id="rQ" placeholder="건물명, 지역, 역 검색" aria-label="공공임대 후보 검색"></label>
+          <button type="button" class="xlsbtn rfold" id="rFold" aria-expanded="false" aria-controls="rBar">조건 펼치기</button>
+        </div>
+        <div class="row opt"><span class="lab">모집</span>
+          <div class="seg" id="rStatus" role="group" aria-label="모집 상태"><button type="button" data-v="active" class="on" aria-pressed="true">모집 중·접수 예정</button><button type="button" data-v="past" aria-pressed="false">지난·취소 모집</button><button type="button" data-v="all" aria-pressed="false">전체</button></div></div>
+        <div class="row opt"><span class="lab">조건 부합도</span>
+          <div class="seg" id="rStar" role="group" aria-label="조건 부합도"><button type="button" data-v="all" class="on" aria-pressed="true">전체</button><button type="button" data-v="none" aria-pressed="false">미평가·확인 필요</button><button type="button" data-v="3" aria-pressed="false">3점 이상</button><button type="button" data-v="4" aria-pressed="false">4점 이상</button><button type="button" data-v="5" aria-pressed="false">5점</button></div></div>
+        <div class="row opt"><span class="lab">방 수</span>
+          <div class="seg" id="rRooms" role="group" aria-label="방 수"><button type="button" data-v="all" class="on" aria-pressed="true">전체</button><button type="button" data-v="2" aria-pressed="false">방 2개 있는 곳</button><button type="button" data-v="3" aria-pressed="false">방 3개 있는 곳</button></div></div>
+        <div class="rsum" id="rSum" role="status"></div>
+        <p class="rnote" id="rNote"></p>
+      </div>
+      <div class="rlist" id="rList"></div>
+      <div class="empty" id="rEmpty" hidden></div>
+    </div>
+    <div class="rdetail" id="rentDetail" hidden></div>
   </section>
 </main>
 
@@ -547,6 +678,7 @@ body.loan aside .sec:not(:first-child){display:none}
 <script src="dashboard_data.js"></script>
 <script src="seoul_gg.js"></script>
 <script src="subway.js"></script>
+<script src="public_rental.js"></script>
 <script>
 const DATA = window.DASHBOARD_DATA || [];
 const META = window.DASHBOARD_META || {};
@@ -770,7 +902,7 @@ const COLS = [
   {k:'name', t:'단지'},
   {k:'region', t:'지역'},
   {k:'score', t:'점수', r:true},
-  {k:'commute', t:'통근 (잠실 · 판교)', r:true},
+  {k:'commute', t:'통근 추정 (잠실 · 판교)', r:true, tip: '대중교통 최단 경로 추정 · 목적지 역 기준'},
   {k:'price', t:'매매가', r:true},
   {k:'area', t:'전용', r:true},
   {k:'pay', t:'월 상환', r:true},
@@ -787,7 +919,8 @@ const getters = {
 };
 // 예산 초과 단지: 모아둔 돈 외에 더 필요한 현금
 const overFlag = r => r.short > 0 ? `<span class="flag over">현금 ${fmtEok(r.short)} 부족</span>` : '';
-const cmtHTML = c => `<span class="cmt num"><span class="lb j">잠실</span><span class="cj">${Math.round(c.commute.jamsil.min)}분</span> · <span class="lb p">판교</span><span class="cp">${Math.round(c.commute.pangyo.min)}분</span></span>`;
+const CMT_TIP = '대중교통 최단 경로 추정이에요. 목적지 역 좌표 기준이라 출입구·출근 시간대 실제 소요와 달라요';
+const cmtHTML = c => `<span class="cmt num" title="${CMT_TIP}"><span class="lb j">잠실</span><span class="cj">${Math.round(c.commute.jamsil.min)}분</span> · <span class="lb p">판교</span><span class="cp">${Math.round(c.commute.pangyo.min)}분</span></span>`;
 
 function renderBudget(I){
   const reg = maxPrice(true, I), non = maxPrice(false, I);
@@ -797,25 +930,27 @@ function renderBudget(I){
       <div><div class="bl">서울·경기 규제지역</div><div class="big num">${fmtEok(reg)}</div><div class="sm">월 <b class="num">${Math.round(pay(reg)).toLocaleString()}만원</b></div></div>
       <div><div class="bl">경기 비규제지역</div><div class="big num">${fmtEok(non)}</div><div class="sm">월 <b class="num">${Math.round(pay(non)).toLocaleString()}만원</b></div></div>
     </div>
-    <div class="foot">위 금액까지 살 수 있어요. 한도 기준은 규제지역 ${bindingRule(reg,true,I)}, 비규제지역 ${bindingRule(non,false,I)}이고, 취득 부대비용 ${ACQ*100}%를 반영했어요.</div>`;
+    <div class="foot"><b>예상 구매 가능액(추정)</b>이에요. 입력한 돈·소득·금리와 2025년 10·15 대책 규정으로 계산했고, 실제 승인 금액은 은행 심사에 따라 달라요. 한도 기준은 규제지역 ${bindingRule(reg,true,I)}, 비규제지역 ${bindingRule(non,false,I)}이고, 취득 부대비용 ${ACQ*100}%를 반영했어요.</div>`;
 }
 
 function renderTop(top, robust){
   $('top3').innerHTML = top.length ? top.map(r => `
-    <article class="card ${SEL===r.c.id?'sel':''}" data-id="${esc(r.c.id)}">
+    <article class="card ${SEL===r.c.id?'sel':''}" data-id="${esc(r.c.id)}" tabindex="0" aria-label="${r.rank}위 ${esc(r.c.name)}, 누르면 지도에서 선택">
       <div class="ch"><span class="rk">${r.rank}</span><h3 title="${esc(r.c.name)}">${esc(r.c.name)}</h3>${heartHTML(r.c.id)}<button type="button" class="detailbtn" data-detail="${esc(r.c.id)}">자세히</button></div>
       <div class="sub">${esc(r.c.region)} ${esc(r.c.umd)}${r.c.built ? ' · ' + r.c.built + '년 준공' : ''}${r.c.hh ? ' · ' + r.c.hh.toLocaleString() + '세대' : ''}${officeFlag(r.c)}${overFlag(r)}${r.c.conv ? '' : '<span class="flag">편의 정보 없음</span>'}</div>
       <div class="score num">${r.score.toFixed(1)}<small>점</small></div>
       <div class="kv">
-        <span>통근</span>${cmtHTML(r.c)}
+        <span>통근 <small class="est" title="${CMT_TIP}">역 기준 추정</small></span>${cmtHTML(r.c)}
         <span>매매가</span><span class="num">${fmtEok(r.unit.price)} · 전용 ${r.unit.area}㎡ · 거래 ${r.unit.n}건</span>
         <span>월 상환</span><span class="num">${Math.round(r.pay).toLocaleString()}만원 · 대출 ${fmtEok(r.loan)}</span>
       </div>
       <div class="why">${why(r)}</div>
+      <details class="more" ${innerWidth > 900 ? 'open' : ''}><summary>점수 구성 · 가중치 민감도</summary>
       <div class="contrib">${METRICS.map(m => `<span>${m.label}</span><span class="t"><i style="width:${(r.n[m.key]*100).toFixed(0)}%"></i></span><span class="v num">${Math.round(r.n[m.key]*100)}</span>`).join('')}</div>
-      <div class="robust"><span>가중치를 ±20% 바꿔도 Top 3 유지</span><b class="num">${Math.round(robust(r.c.id)*100)}%</b></div>
+      <div class="robust"><span title="가중치 민감도 지표예요. 자료 정확도나 집의 우수성을 뜻하지 않아요">가중치 ±20% 변동 시 Top 3 유지율 <small>(민감도)</small></span><b class="num">${Math.round(robust(r.c.id)*100)}%</b></div>
+      </details>
     </article>`).join('') : '<div class="empty" style="grid-column:1/-1">조건에 맞는 단지가 없어요.</div>';
-  document.querySelectorAll('.card').forEach(el => el.onclick = () => select(el.dataset.id, true));
+  document.querySelectorAll('.card').forEach(el => { el.onclick = () => select(el.dataset.id, true); el.onkeydown = e => { if ((e.key === 'Enter' || e.key === ' ') && e.target === el){ e.preventDefault(); select(el.dataset.id, true); } }; });
   bindHearts($('top3')); bindDetail($('top3'));
 }
 
@@ -824,7 +959,7 @@ const trendHTML = t => t == null ? '<span style="color:var(--t6)">-</span>'
 
 function renderDuo(I){
   if (I.sido !== 'all'){ $('duo').innerHTML = ''; return; }
-  const tile = (label, r) => r ? `<div class="tile" data-detail="${esc(r.c.id)}">
+  const tile = (label, r) => r ? `<div class="tile" data-detail="${esc(r.c.id)}" tabindex="0" role="button" aria-label="${label} 1위 ${esc(r.c.name)} 자세히 보기">
       <span class="lbl">${label} 1위</span>
       <div class="grow"><div class="nm">${esc(r.c.name)}</div>
         <div class="meta">${esc(r.c.region)} · <b class="num">${fmtEok(r.unit.price)}</b> · 월 <b class="num">${Math.round(r.pay)}만원</b> · ${cmtHTML(r.c)}</div></div>
@@ -878,9 +1013,11 @@ function matchQ(c, q){
 }
 let LIST = [];
 function renderTable(rows){
-  $('thr').innerHTML = COLS.map(c => `<th class="${c.r?'r':''} ${SORT.key===c.k?'on':''}" data-k="${c.k}">${c.t}${SORT.key===c.k ? (SORT.dir<0?' ▼':' ▲') : ''}</th>`).join('');
+  $('thr').innerHTML = COLS.map(c => `<th class="${c.r?'r':''} ${SORT.key===c.k?'on':''}" data-k="${c.k}" ${c.t ? `aria-sort="${SORT.key===c.k ? (SORT.dir<0?'descending':'ascending') : 'none'}"` : ''}>${c.t ? `<button type="button" class="thb" ${c.tip ? `title="${c.tip}"` : ''} aria-label="${c.t} 기준 정렬">${c.t}${SORT.key===c.k ? (SORT.dir<0?' ▼':' ▲') : ''}</button>` : ''}</th>`).join('');
   document.querySelectorAll('#thr th').forEach(th => th.onclick = () => {
-    const k = th.dataset.k; SORT = {key:k, dir: SORT.key===k ? -SORT.dir : (k==='score'?-1:1)}; renderTable(ROWS);
+    const k = th.dataset.k; if (!COLS.find(c => c.k === k).t) return;
+    SORT = {key:k, dir: SORT.key===k ? -SORT.dir : (k==='score'?-1:1)}; renderTable(ROWS);
+    $('thr').querySelector(`th[data-k="${k}"] .thb`)?.focus();   // 다시 그린 뒤에도 포커스 유지
   });
   const q = $('q').value.trim();
   let list = q ? rows.filter(r => matchQ(r.c, q)) : rows;
@@ -888,7 +1025,7 @@ function renderTable(rows){
   list = [...list].sort((a,b) => { const x=g(a), y=g(b); return (x>y?1:x<y?-1:0) * SORT.dir; });
   LIST = list;   // 엑셀 내보내기용: 화면 표에 400곳만 그려도 전체 목록을 내보낸다
   $('tbody').innerHTML = list.slice(0, 400).map(r => `
-    <tr data-id="${esc(r.c.id)}" class="${r.rank<=3?'top':''} ${SEL===r.c.id?'sel':''}">
+    <tr data-id="${esc(r.c.id)}" tabindex="0" aria-selected="${SEL===r.c.id}" class="${r.rank<=3?'top':''} ${SEL===r.c.id?'sel':''}">
       <td class="hc">${heartHTML(r.c.id)}</td><td class="r num"><span class="rpill">${r.rank}</span></td><td>${esc(r.c.name)}${officeFlag(r.c)}${overFlag(r)}${r.c.conv?'':'<span class="flag">편의 없음</span>'}</td>
       <td>${esc(r.c.region)} ${esc(r.c.umd)}</td>
       <td class="r num">${r.score.toFixed(1)}<span class="sbar"><i style="width:${r.score.toFixed(0)}%"></i></span></td>
@@ -902,10 +1039,12 @@ function renderTable(rows){
     const all = q ? DATA.filter(c => matchQ(c, q)).length : 0;
     $('empty').textContent = !q ? '조건에 맞는 단지가 없어요. 최대 통근 시간이나 예산을 넓혀 보세요.'
       : all ? `'${q}' 단지가 ${all}곳 있지만 지금 조건(구·시, 통근, 면적, 예산 등)에 맞지 않아요.`
-      : `'${q}'에 해당하는 단지가 없어요. 처음 수집할 때 예산(약 4.7억) 안에 드는 평형이 있는 단지만 모아서, 분당처럼 집값이 높은 지역은 빠져 있어요.`;
+      : `'${q}'에 해당하는 단지가 없어요. ` + (META.transit_done != null
+          ? `지금 자료는 매매 12억 이하 평형이 있는 단지 ${META.targets.toLocaleString()}곳 중 ${META.transit_done.toLocaleString()}곳까지 분석한 상태예요(매일 추가 중). 아직 수집되지 않았거나 수집 대상 밖일 수 있어요.`
+          : `수집 대상 밖이거나 아직 수집되지 않은 단지일 수 있어요.`);
   }
   $('tabSub').textContent = (q ? `'${q}' 검색 ` : '') + `${rows.length.toLocaleString()}곳` + (list.length > 400 ? ' · 상위 400곳 표시' : '');
-  document.querySelectorAll('#tbody tr').forEach(tr => tr.onclick = () => select(tr.dataset.id, true));
+  document.querySelectorAll('#tbody tr').forEach(tr => { tr.onclick = () => select(tr.dataset.id, true); tr.onkeydown = e => { if ((e.key === 'Enter' || e.key === ' ') && e.target === tr){ e.preventDefault(); select(tr.dataset.id, true); } }; });
   bindHearts($('tbody')); bindDetail($('tbody'));
 }
 
@@ -927,6 +1066,7 @@ function draw(recompute = true){
     ROWS.forEach((r,i) => r.rank = i+1);
     robustFn = robustness(ROWS);
   }
+  renderFilters(I);
   renderDuo(readInputs());
   renderTop(ROWS.slice(0,3), robustFn);
   renderMap(ROWS);
@@ -1012,15 +1152,40 @@ function renderCompare(){
   $('cmpBody').querySelectorAll('[data-visit]').forEach(b => b.onchange = () => { FAV[b.dataset.visit].visited = b.checked; saveFav(); renderCompare(); });
   $('cmpBody').querySelectorAll('[data-memo]').forEach(t => t.oninput = () => { FAV[t.dataset.memo].memo = t.value; saveFav(); });
 }
+// ── 모달 공통: 열 때 포커스 이동, Tab 순환, 배경 inert, 닫을 때 연 요소로 복귀 ──
+const FOCUSABLE = 'a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])';
+const OPENER = {sheet:null, detail:null};
+function syncInert(){
+  const sheet = $('sheet').classList.contains('open'), detail = $('detail').classList.contains('open');
+  document.querySelectorAll('header, aside, main, #vsplit, #mbar').forEach(el => el.inert = sheet || detail);
+  $('sheet').inert = detail;
+}
+function trapTab(e, box){
+  if (e.key !== 'Tab') return;
+  const f = [...box.querySelectorAll(FOCUSABLE)].filter(el => el.getClientRects().length);
+  if (!f.length) return;
+  const first = f[0], last = f[f.length - 1], cur = document.activeElement;
+  if (e.shiftKey && (cur === first || !box.contains(cur))){ e.preventDefault(); last.focus(); }
+  else if (!e.shiftKey && (cur === last || !box.contains(cur))){ e.preventDefault(); first.focus(); }
+}
+function restoreFocus(el){ if (el && el.isConnected && el.getClientRects().length) el.focus({preventScroll:true}); }
 function openSheet(open){
-  $('sheet').classList.toggle('open', open); $('scrim').classList.toggle('open', open);
+  const was = $('sheet').classList.contains('open');
+  if (open && !was) OPENER.sheet = document.activeElement;
+  $('sheet').classList.toggle('open', open); $('scrim').classList.toggle('open', open || $('detail').classList.contains('open'));
   $('sheet').setAttribute('aria-hidden', String(!open));
-  if (open) renderCompare();
+  syncInert();
+  if (open){ renderCompare(); $('favClose').focus(); }
+  else if (was) restoreFocus(OPENER.sheet);
 }
 $('favOpen').onclick = () => openSheet(true);
 $('favClose').onclick = () => openSheet(false);
-$('scrim').onclick = () => { closeDetail(); openSheet(false); };
-document.addEventListener('keydown', e => { if (e.key === 'Escape'){ closeDetail(); openSheet(false); } });
+$('scrim').onclick = () => { if ($('detail').classList.contains('open')) closeDetail(); else openSheet(false); };
+document.addEventListener('keydown', e => {
+  const detail = $('detail').classList.contains('open'), sheet = $('sheet').classList.contains('open');
+  if (e.key === 'Escape'){ if (detail) closeDetail(); else if (sheet) openSheet(false); return; }   // 맨 위 창부터 하나씩 닫는다
+  if (detail) trapTab(e, $('detail')); else if (sheet) trapTab(e, $('sheet'));
+});
 const favMsg = m => { $('favMsg').textContent = m; clearTimeout(favMsg.t); favMsg.t = setTimeout(() => $('favMsg').textContent = '', 4000); };
 $('favExport').onclick = async () => {
   const text = JSON.stringify(FAV);
@@ -1042,7 +1207,10 @@ saveFav();
 // ── 단지 상세 ──
 let DT = null;   // {id, unitIdx}
 function bindDetail(root){
-  root.querySelectorAll('[data-detail]').forEach(b => b.onclick = e => { e.stopPropagation(); openDetail(b.dataset.detail); });
+  root.querySelectorAll('[data-detail]').forEach(b => {
+    b.onclick = e => { e.stopPropagation(); openDetail(b.dataset.detail); };
+    if (b.tagName !== 'BUTTON') b.onkeydown = e => { if ((e.key === 'Enter' || e.key === ' ') && e.target === b){ e.preventDefault(); e.stopPropagation(); openDetail(b.dataset.detail); } };
+  });
 }
 function openDetail(id, unitIdx){
   const c = BY_ID.get(id); if (!c) return;
@@ -1060,10 +1228,20 @@ function openDetail(id, unitIdx){
     <a href="https://m.land.naver.com/search/result/${q}" target="_blank" rel="noopener">네이버 부동산 ↗</a>
     <a href="https://map.kakao.com/link/roadview/${c.lat},${c.lng}" target="_blank" rel="noopener">로드뷰 ↗</a>`;
   renderDetailBody(c, I, d);
+  if (!$('detail').classList.contains('open')) OPENER.detail = document.activeElement;
   $('detail').classList.add('open'); $('scrim').classList.add('open'); $('detail').setAttribute('aria-hidden','false');
+  syncInert(); $('dtClose').focus();
 }
-function closeDetail(){ $('detail').classList.remove('open'); $('detail').setAttribute('aria-hidden','true');
-  if (!$('sheet').classList.contains('open')) $('scrim').classList.remove('open'); }
+function closeDetail(){
+  if (!$('detail').classList.contains('open')) return;
+  $('detail').classList.remove('open'); $('detail').setAttribute('aria-hidden','true');
+  if (!$('sheet').classList.contains('open')) $('scrim').classList.remove('open');
+  syncInert();
+  // 연 요소가 사라졌으면(지도 말풍선 등) 같은 단지의 목록 행으로 돌아간다
+  const op = OPENER.detail, id = DT && DT.id;
+  if (op && op.isConnected && op.getClientRects().length) op.focus({preventScroll:true});
+  else restoreFocus(document.querySelector(`#tbody tr[data-id="${CSS.escape(id || '')}"]`) || $('q'));
+}
 function renderDetailBody(c, I, d){
   const u = c.units[DT.unitIdx] || d.unit;
   const j = c.commute.jamsil, p = c.commute.pangyo;
@@ -1077,7 +1255,7 @@ function renderDetailBody(c, I, d){
       ${stat('가격 흐름', u.trend == null ? '-' : (u.trend > 0 ? '+' : '') + u.trend.toFixed(1) + '%', '최근 6개월 vs 그 전 6개월')}
       ${stat('최근 1년 거래', u.n + '건', `마지막 ${u.latest}`)}
     </div>
-    <div class="dt-h">통근 <small>대중교통, 가장 빠른 경로 기준</small></div>
+    <div class="dt-h">통근 <small>대중교통 최단 경로 추정 · 목적지 역 좌표 기준이라 출입구·출근 시간대 실측과 달라요</small></div>
     ${nearHTML(c)}
     <div class="cmrow">
       ${stat('<span class="cmt"><span class="lb j">잠실</span></span>', Math.round(j.min) + '분', `환승 ${j.transfers}회 · 도보 ${Math.round(j.walk)}분${j.fare ? ' · ' + j.fare.toLocaleString() + '원' : ''}`)}
@@ -1155,10 +1333,47 @@ document.querySelectorAll('#sidoSeg button').forEach(b => b.onclick = () => {
   draw(true);
 });
 $('resetW').onclick = () => { METRICS.forEach(m => $('w_' + m.key).value = m.def); draw(true); };
+// ── 활성 필터 요약: 기본값과 다른 조건만 칩으로 보여주고 하나씩 또는 한 번에 되돌린다 (예산·가중치·관심 단지는 건드리지 않는다) ──
+const setSido = v => document.querySelectorAll('#sidoSeg button').forEach(x => x.classList.toggle('on', x.dataset.v === v));
+const FILTERS = [
+  {on: I => I.sido !== 'all', lab: I => `지역 ${I.sido}`, reset: () => setSido('all')},
+  {on: I => !!I.gu, lab: I => `구·시 ${I.gu}`, reset: () => $('gu').value = ''},
+  {on: I => !!I.q, lab: I => `검색 '${I.q}'`, reset: () => $('q').value = ''},
+  {on: I => I.maxCommute !== 90, lab: I => `통근 ${I.maxCommute}분 이하`, reset: () => $('maxCommute').value = 90},
+  {on: I => I.minArea !== 40, lab: I => `전용 ${I.minArea}㎡ 이상`, reset: () => $('minArea').value = 40},
+  {on: I => I.minDeals !== 2, lab: I => `거래 ${I.minDeals}건 이상`, reset: () => $('minDeals').value = 2},
+  {on: I => I.minBuilt !== 1990, lab: I => `${I.minBuilt}년 이후 준공`, reset: () => $('minBuilt').value = 1990},
+  {on: I => I.minHH !== 100, lab: I => `${I.minHH}세대 이상`, reset: () => $('minHH').value = 100},
+  {on: I => !I.noOffice, lab: () => '오피스텔형 포함', reset: () => $('noOffice').checked = true},
+  {on: I => I.showOver, lab: () => '예산 넘는 단지 포함', reset: () => $('showOver').checked = false},
+  {on: I => isFinite(I.maxPay), lab: I => `월 상환 ${I.maxPay}만원 이하`, reset: () => $('maxPay').value = ''},
+];
+function activeFilters(I){ return FILTERS.filter(f => f.on(I)); }
+function resetFilters(){ FILTERS.forEach(f => f.reset()); draw.fitted = false; draw(true); $('afbar').querySelector('button')?.focus(); }
+function renderFilters(I){
+  const act = activeFilters(I);
+  $('afbar').innerHTML = act.length
+    ? `<span>적용 중</span>${act.map((f, i) => `<span class="af">${esc(f.lab(I))}<button type="button" data-f="${i}" aria-label="${esc(f.lab(I))} 조건 해제">✕</button></span>`).join('')}<button type="button" class="txtbtn" id="resetF2">조건 초기화</button>`
+    : '';
+  $('afbar').querySelectorAll('[data-f]').forEach(b => b.onclick = () => { act[+b.dataset.f].reset(); draw.fitted = false; draw(true); $('q').focus({preventScroll:true}); });
+  if ($('resetF2')) $('resetF2').onclick = resetFilters;
+  if ($('mbarN')) $('mbarN').textContent = `${ROWS.length.toLocaleString()}곳` + (act.length ? ` · 조건 ${act.length}개` : '');
+}
+$('resetF').onclick = resetFilters;
 let qTimer;
 $('q').addEventListener('input', () => { clearTimeout(qTimer); qTimer = setTimeout(() => { draw.fitted = false; draw(true); }, 250); });
 draw(true);
-
+// ── 모바일 고정 막대: 조건 펼치기/접기, 전체 목록으로 이동 ──
+function mbarLabel(){
+  const open = document.body.classList.contains('cond-open'), what = document.body.classList.contains('loan') ? '예산 입력' : '조건';
+  $('mbarCond').setAttribute('aria-expanded', open); $('mbarCond').textContent = `${what} ${open ? '접기' : '펼치기'}`;
+}
+$('mbarCond').onclick = () => {
+  const open = document.body.classList.toggle('cond-open'); mbarLabel();
+  if (open) $('aside').querySelector('input, select, button')?.focus({preventScroll:true});
+  else $('mbarCond').focus();
+};
+$('mbarList').onclick = () => { document.querySelector('.tablewrap').scrollIntoView({block:'start', behavior:'smooth'}); setTimeout(() => $('q').focus({preventScroll:true}), 400); };
 // ── 지도 / 단지 목록 높이 조절 (끌거나 위·아래 화살표) ──
 {
   const wrap = document.querySelector('.mapwrap'), sp = $('splitter');
@@ -1427,12 +1642,201 @@ document.querySelectorAll('#lReg button').forEach(b => b.onclick = () => { LS.re
 document.querySelectorAll('#lMethod button').forEach(b => b.onclick = () => { LS.method = b.dataset.v; syncSeg(); renderLoan(); });
 document.querySelectorAll('#own, #income, #first, #rate, #years').forEach(el => el.addEventListener('input', () => { LS.loan = null; if (document.body.classList.contains('loan')) renderLoan(); }));
 document.querySelectorAll('#viewSeg button').forEach(b => b.onclick = () => {
-  const loan = b.dataset.v === 'loan';
+  const loan = b.dataset.v === 'loan', rent = b.dataset.v === 'rent';
   document.querySelectorAll('#viewSeg button').forEach(x => { x.classList.toggle('on', x === b); x.setAttribute('aria-selected', x === b); });
   document.body.classList.toggle('loan', loan);
+  document.body.classList.toggle('rent', rent);
   document.querySelector('main').classList.toggle('loan', loan);
-  if (loan) renderLoan(); else map.invalidateSize();
+  document.querySelector('main').classList.toggle('rent', rent);
+  if (loan) renderLoan(); else if (rent) renderRent(); else map.invalidateSize();
+  mbarLabel();
 });
+
+/* ── 공공임대 후보 탭 ──
+   입력: public_rental.js (data/public-rental 실제 조사 스냅샷을 scripts/build_public_rental.py로 묶음)
+   별점은 기준 확정 전이라 모두 미평가. 미확인 값은 0이나 충족으로 바꾸지 않는다. */
+const PR = window.PUBLIC_RENTAL || {candidates:[]};
+const RS = {q:'', status:'active', star:'all', rooms:'all', open:null, group:null, unit:null, model:false, scroll:0};
+const krw = v => v == null ? '미확인' : (v >= 1e8 ? `${Math.floor(v/1e8)}억 ` : '') + (v % 1e8 ? `${(Math.round(v % 1e8 / 1e3) / 10).toLocaleString()}만` : '') + '원';
+const rng = (a, f) => a[0] === a[1] ? f(a[0]) : `${f(a[0])} ~ ${f(a[1])}`;
+const m2 = v => `${v.toFixed(2)}㎡`;
+const kst = iso => { const d = new Date(iso); return d.toLocaleString('ko-KR', {timeZone:'Asia/Seoul', month:'numeric', day:'numeric', weekday:'short', hour:'2-digit', minute:'2-digit', hour12:false}); };
+// 상태 우선순위: 취소 확인 > 정정 공고 연결(최신 조건 미대조) > 일정. 취소는 활성 목록에서 뺀다
+const isCancelled = n => { const rev = n.revision_check || {}; return /취소|cancel/i.test(String(rev.linked_revision_kind || '')) || /취소|cancel/i.test(String(n.official_page_status || '')); };
+function rentStatus(n){
+  if (isCancelled(n)) return {k:'cancelled', t:'취소 공고', c:'past'};
+  const rev = n.revision_check || {}, revised = !!rev.linked_revision_pan_id;
+  const now = Date.now(), st = n.application_start_at ? Date.parse(n.application_start_at) : null, en = n.application_end_at ? Date.parse(n.application_end_at) : null;
+  let s;
+  if (en != null && now > en) s = {k:'past', t:'지난 모집', c:'past'};
+  else if (st != null && now < st) s = {k:'active', t:'접수 예정', c:'sch'};
+  else if (st != null && en != null) s = {k:'active', t:'접수 중', c:'open'};
+  else s = {k:'active', t:'일정 확인 필요', c:'warn'};
+  // 정정 공고가 연결돼 있으면 이 화면의 조건이 최신인지 대조되지 않았다는 뜻. 상태 배지에 함께 표시한다
+  if (revised){ s = {...s, revised:true, c:'warn', t: s.t + ' · 정정 공고 있음(최신 조건 미대조)'}; }
+  return s;
+}
+function roomMix(d){
+  const m = {}; d.units.forEach(u => { const k = u.bedrooms == null ? '방 수 미확인' : `방 ${u.bedrooms}개`; m[k] = (m[k]||0) + 1; });
+  return Object.entries(m).sort().map(([k, v]) => `${k} ${v}호`).join(' · ');
+}
+const starText = r => r && r.stars != null ? `${'★'.repeat(r.stars)}${'☆'.repeat(5 - r.stars)} ${r.stars}/5` : '미평가';
+const matchUnits = d => RS.rooms === 'all' ? null : d.units.filter(u => u.bedrooms === +RS.rooms).length;   // 조건 일치 호실 수(필터 없으면 null)
+const hasPlan = d => d.sources.some(x => x.type === 'official_brochure');   // 공식 도면·홍보자료 링크 유무
+const structBadge = d => d.models.length ? '대표 1호실 입체 모형' : hasPlan(d) ? '3D 미제작 · 공식 도면 확인' : '구조 자료 없음';
+function rentRows(){
+  const q = RS.q.toLowerCase();
+  return PR.candidates.filter(d => {
+    const b = d.building, s = rentStatus(d.notice);
+    if (RS.status === 'active' && s.k !== 'active') return false;
+    if (RS.status === 'past' && s.k !== 'past' && s.k !== 'cancelled') return false;
+    const st = b.rating && b.rating.stars;
+    if (RS.star === 'none' && st != null) return false;
+    if (/^[345]$/.test(RS.star) && !(st != null && st >= +RS.star)) return false;
+    if (RS.rooms !== 'all' && !d.units.some(u => u.bedrooms === +RS.rooms)) return false;
+    if (q){
+      const hay = [b.name, b.address, b.region.province, b.region.city_district, b.nearest_station && b.nearest_station.name, d.notice.title].join(' ').toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  }).sort((a, b) => {
+    // 조건 부합도 높은 순 → 마감 빠른 순 → 식별자. 미평가는 뒤로, 마감 미상은 임의 날짜 없이 뒤로.
+    const sa = a.building.rating.stars, sb = b.building.rating.stars;
+    if ((sb ?? -1) !== (sa ?? -1)) return (sb ?? -1) - (sa ?? -1);
+    const ea = Date.parse(a.notice.application_end_at) || Infinity, eb = Date.parse(b.notice.application_end_at) || Infinity;
+    if (ea !== eb) return ea - eb;
+    return a.building.listing_id < b.building.listing_id ? -1 : 1;
+  });
+}
+function syncRentSeg(){
+  [['rStatus','status'],['rStar','star'],['rRooms','rooms']].forEach(([id, k]) => document.querySelectorAll(`#${id} button`).forEach(x => { const on = x.dataset.v === RS[k]; x.classList.toggle('on', on); x.setAttribute('aria-pressed', on); }));
+}
+function renderRent(){
+  if (RS.open){ renderRentDetail(); return; }
+  $('rentDetail').hidden = true; $('rentDetail').innerHTML = ''; $('rentList').hidden = false;   // iframe까지 내린다
+  syncRentSeg();
+  const rows = rentRows();
+  const act = [];
+  if (RS.q) act.push(`'${esc(RS.q)}'`);
+  if (RS.status !== 'active') act.push(RS.status === 'past' ? '지난·취소 모집' : '모집 상태 전체');
+  if (RS.star !== 'all') act.push({none:'미평가·확인 필요', 3:'3점 이상', 4:'4점 이상', 5:'5점'}[RS.star]);
+  if (RS.rooms !== 'all') act.push(`방 ${RS.rooms}개 있는 곳`);
+  const units = rows.reduce((s, d) => s + d.units.length, 0);
+  $('rSum').innerHTML = `<span>건물 <b class="num">${rows.length}</b>곳 · 모집 호실 <b class="num">${units}</b>호</span>`
+    + (act.length ? act.map(a => `<span class="af">${a}</span>`).join('') + `<button type="button" class="txtbtn" id="rReset">필터 모두 해제</button>` : `<span class="rnote">기본: 모집 중·접수 예정 · 조건 부합도 높은 순(동점은 마감 빠른 순)</span>`);
+  if ($('rReset')) $('rReset').onclick = () => { Object.assign(RS, {q:'', status:'active', star:'all', rooms:'all'}); $('rQ').value = ''; renderRent(); };
+  $('rNote').innerHTML = `${esc(PR.snapshot_date)} LH 공식 원문 기준 자료 · 이 화면 자료 생성 ${kst(PR.prepared_at)}. <span class="warnt">공고별 공식 확인 시각은 상세의 '공식 확인' 항목이 기준이에요.</span> 예약 수집 자동 연결 전이에요. 조건 부합도는 기준 확정 전이라 모든 후보가 미평가예요.`;
+  $('rList').innerHTML = rows.map(d => {
+    const b = d.building, n = d.notice, s = rentStatus(n);
+    const hasModel = d.models.length > 0;
+    return `<button type="button" class="rcard" data-id="${esc(b.listing_id)}">
+      <div class="bd">
+        <div class="badges"><span class="bdg ${s.c}">${s.t}</span><span class="bdg">조건 부합도 ${starText(b.rating)}</span><span class="bdg ${hasModel ? '' : 'warn'}">${structBadge(d)}</span></div>
+        <h3>${esc(b.name)}</h3>
+        <div class="sub">${esc(b.region.province)} ${esc(b.region.city_district)} · ${esc(b.building_type)} · ${b.nearest_station ? `${esc(b.nearest_station.name)}역 걸어서 약 ${b.nearest_station.estimated_walk_minutes}분(직선거리 추정)` : '가까운 역 미확인'}</div>
+        <div class="rkv">
+          <span>신청</span><span>${n.application_start_at ? `${kst(n.application_start_at)} ~ ${kst(n.application_end_at)}` : '원문 확인 필요'}</span>
+          <span>보증금</span><span class="num">${rng(b.deposit_krw_range, krw)} <small style="color:var(--t5);font-weight:500">월세 없음(든든전세)</small></span>
+          <span>전용면적</span><span class="num">${rng(b.exclusive_area_m2_range, m2)}</span>
+          <span>구성</span><span>${matchUnits(d) != null ? `<b>조건 일치 ${matchUnits(d)}호</b> / 전체 ${d.units.length}호` : `${d.units.length}호`} · ${roomMix(d)}</span>
+        </div>
+        <p class="why">동·호는 무작위 배정이라 특정 호실을 고를 수 없어요. 신청 자격은 개인별 확인이 필요해요.</p>
+      </div></button>`;
+  }).join('');
+  $('rEmpty').hidden = rows.length > 0;
+  const anyRated = PR.candidates.some(d => d.building.rating && d.building.rating.stars != null);
+  $('rEmpty').innerHTML = (/^[345]$/.test(RS.star) && !anyRated
+      ? `아직 평가된 후보가 없어요. 조건 부합도 기준이 확정되면 별점이 매겨져요(임의 점수는 넣지 않아요). `
+      : `조건에 맞는 후보가 없어요. `) + `<button type="button" class="txtbtn" id="rReset2">필터 모두 해제</button>`;
+  if ($('rReset2')) $('rReset2').onclick = () => $('rReset') ? $('rReset').click() : null;
+  $('rList').querySelectorAll('.rcard').forEach(c => c.onclick = () => openRent(c.dataset.id));
+}
+function openRent(id){
+  RS.scroll = document.querySelector('main').scrollTop || window.scrollY;
+  const d = PR.candidates.find(x => x.building.listing_id === id);
+  // 방 수 필터가 켜져 있으면 그 조건에 맞는 호실이 든 묶음을 먼저 연다
+  const g0 = d.structure_browsing_groups.find(g => RS.rooms !== 'all' && g.unit_ids.some(uid => (d.units.find(u => u.id === uid) || {}).bedrooms === +RS.rooms)) || d.structure_browsing_groups[0];
+  RS.open = id; RS.group = g0 && g0.id; RS.unit = null; RS.model = false;
+  renderRentDetail();
+  const m = document.querySelector('main'); m.scrollTop = 0; window.scrollTo(0, 0);
+  $('rBack').focus();
+}
+function closeRent(){
+  const id = RS.open; RS.open = null; RS.unit = null; RS.model = false; renderRent();
+  requestAnimationFrame(() => {
+    document.querySelector('main').scrollTop = RS.scroll; window.scrollTo(0, RS.scroll);
+    const c = document.querySelector(`.rcard[data-id="${CSS.escape(id)}"]`); if (c) c.focus({preventScroll:true});
+  });
+}
+function renderRentDetail(focusSel){
+  const d = PR.candidates.find(x => x.building.listing_id === RS.open);
+  const b = d.building, n = d.notice, s = rentStatus(n);
+  $('rentList').hidden = true; $('rentDetail').hidden = false;
+  const src = id => d.sources.find(x => x.id === id);
+  const g = d.structure_browsing_groups.find(x => x.id === RS.group) || d.structure_browsing_groups[0];
+  const gUnits = g ? d.units.filter(u => g.unit_ids.includes(u.id)) : d.units;
+  const unit = d.units.find(u => u.id === RS.unit);
+  const model = unit && unit.model_id ? d.models.find(m => m.id === unit.model_id) : null;
+  const typeName = {official_notice_page:'LH 원 공고 페이지', official_notice_pdf:'공고문 PDF', official_supply_list:'공급 주택목록(엑셀)', official_brochure:'공식 홍보자료'};
+  const rev = n.revision_check || {};
+  const alloc = n.allocation || {};
+  let modelHtml;
+  if (!unit) modelHtml = `<div class="rnomodel">위 표에서 호실을 고르면 그 호실의 구조 자료를 보여 드려요.${d.models.length ? ` 지금 입체 모형이 있는 호실: ${d.models.map(m => esc((d.units.find(u => u.id === m.represents_unit_id) || {}).unit_number || '')).join(', ')}호` : (hasPlan(d) ? ' 이 건물은 3D 미제작이에요. 공식 도면은 위 홍보자료 링크에서 확인해 주세요.' : ' 이 건물은 아직 입체 모형도 공식 도면도 없어요.')}</div>`;
+  else if (!model) modelHtml = `<div class="rnomodel"><b>${esc(unit.unit_number)}호는 입체 모형이 아직 없어요(3D 미제작).</b> 다른 호실의 모형을 이 호실에 쓰지 않아요. 방 수·면적이 같아도 배치가 같다고 확인되지 않았어요. ${hasPlan(d) ? '위 공식 홍보자료 링크에서 도면을 확인해 주세요.' : '공식 도면도 아직 없어요.'}</div>`;
+  else if (!RS.model) modelHtml = `<div class="rnomodel"><b>${esc(unit.unit_number)}호 입체 모형</b>이 있어요. 공식 도면을 참고한 단순화 모형이라 비례·층고·가구는 추정이에요.<br><button type="button" class="btn2 primary" id="rLoadModel" style="margin-top:10px">입체 모형 열기</button></div>`;
+  else modelHtml = `<p class="rwarn">구조 이해용 · ${esc(unit.unit_number)}호만 해당 · 치수·층고·가구는 추정(가구는 제공 옵션 아님)</p>
+      <iframe src="${esc(model.asset.url)}" title="${esc(b.name)} ${esc(unit.unit_number)}호 입체 구조 모형" loading="lazy"></iframe>`;
+  $('rentDetail').innerHTML = `
+    <button type="button" class="rback" id="rBack">← 후보 목록</button>
+    <section class="rsec">
+      <div class="badges" style="margin-bottom:8px"><span class="bdg ${s.c}">${s.t}</span><span class="bdg">조건 부합도 ${starText(b.rating)}</span><span class="bdg ${d.models.length ? '' : 'warn'}">${structBadge(d)}</span><span class="bdg warn">신청 자격 개인 확인 필요</span>${matchUnits(d) != null ? `<span class="bdg open">방 ${RS.rooms}개 조건 일치 ${matchUnits(d)}호 / 전체 ${d.units.length}호</span>` : ''}</div>
+      <h2>${esc(b.name)}</h2>
+      <p>${esc(b.address)} · ${esc(b.building_type)}</p>
+      <p>${b.nearest_station ? `${esc(b.nearest_station.name)}역(${b.nearest_station.lines.map(esc).join('·')}) 걸어서 약 ${b.nearest_station.estimated_walk_minutes}분. 직선거리로 추정한 값이라 실제 보행 시간과 달라요.` : ''}</p>
+      <p class="rnote" style="margin-top:6px">${b.rating.stars == null ? `조건 부합도 미평가: ${esc(b.rating.reason || '평가 기준 확정 전')}` : `조건 부합도 ${b.rating.stars}/5 · 기준 ${esc(b.rating.criteria_version || '미표기')}${b.rating.evaluated_at ? ` · 평가일 ${kst(b.rating.evaluated_at)}` : ''}${b.rating.reason ? ` · ${esc(b.rating.reason)}` : ''}`}</p>
+    </section>
+    <section class="rsec">
+      <h3>이번 모집 <small>${esc(n.agency)} · 공고일 ${esc(n.published_on || '')}</small></h3>
+      <p><b>${esc(n.title)}</b></p>
+      <div class="rkv" style="margin:10px 0">
+        <span>신청 기간</span><span>${n.application_start_at ? `${kst(n.application_start_at)} ~ ${kst(n.application_end_at)}` : '원문 확인 필요'}</span>
+        <span>월 임대료</span><span>없음(든든전세). 대출 이자·관리비·주차비는 별도</span>
+        <span>관리비</span><span>미확인</span>
+        <span>공식 확인</span><span>${kst(n.status_as_of)} (이후 정정·취소는 원문에서 재확인)</span>
+        <span>정정·취소</span><span>${rev.linked_revision_pan_id ? `연결된 공고 있음: ${esc(rev.linked_revision_kind || '')} ${esc(rev.linked_revision_pan_id)}` : '확인 시점에 연결된 정정·취소 공고 없음'}</span>
+      </div>
+      <p class="rwarn">${esc(alloc.note || '동·호 배정 방식은 원문 확인 필요')}</p>
+      ${(n.application_restrictions || []).map(x => `<p class="rnote" style="margin-top:6px">${esc(x)}</p>`).join('')}
+      <div class="rlinks" style="margin-top:12px">${d.sources.map(x => `<a href="${esc(x.url)}" target="_blank" rel="noopener">${typeName[x.type] || '출처'}${x.scope ? ` ${esc(x.scope)}` : ''}${x.material_year ? ` (${x.material_year})` : ''} ↗</a>`).join('')}</div>
+    </section>
+    <section class="rsec">
+      <h3>구조 → 호실 <small>탐색용 분류예요. 같은 묶음이라도 배치가 같다고 확인된 건 아니에요</small></h3>
+      <div class="rgroups" role="group" aria-label="구조 묶음">${d.structure_browsing_groups.map(x => `<button type="button" data-g="${esc(x.id)}" aria-pressed="${x.id === (g && g.id)}">${esc(x.label)} <span class="num">${x.unit_ids.length}</span></button>`).join('')}</div>
+      <div class="utwrap"><table class="utable"><thead><tr><th>호실</th><th>층</th><th>방</th><th>전용</th><th>실사용</th><th>공급형</th><th>보증금</th><th>입체 모형</th></tr></thead><tbody>
+        ${gUnits.map(u => `<tr tabindex="0" data-u="${esc(u.id)}" aria-selected="${u.id === RS.unit}"><td><b>${esc(u.unit_number)}호</b></td><td class="num">${u.floor}층${u.floor_source === 'unit_number_inference' ? '*' : ''}</td><td class="num">${u.bedrooms ?? '?'}개</td><td class="num">${m2(u.exclusive_area_m2)}</td><td class="num">${u.usable_area_m2 != null ? m2(u.usable_area_m2) : '미확인'}</td><td>${esc(u.application_area_band || '')}</td><td class="num">${krw(u.deposit_krw)}</td><td>${u.model_id ? '있음' : '—'}</td></tr>`).join('')}
+      </tbody></table></div>
+      ${d.units.some(u => u.floor_source === 'unit_number_inference') ? '<p class="rnote" style="margin-top:6px">* 층은 호 번호로 추정했어요.</p>' : ''}
+      <div class="rmodel" tabindex="-1" aria-label="${esc(b.name)} 구조 자료">${modelHtml}</div>
+    </section>
+    <section class="rsec">
+      <h3>알아둘 점</h3>
+      <ul>${b.observations.map(x => `<li>${esc(x)}</li>`).join('')}</ul>
+      <h3 style="margin-top:12px">아직 모르는 것 <small>현장·원문에서 확인</small></h3>
+      <ul>${b.unknowns.map(x => `<li>${esc(x)}</li>`).join('')}</ul>
+    </section>`;
+  $('rBack').onclick = closeRent;
+  $('rentDetail').querySelectorAll('[data-g]').forEach(x => x.onclick = () => { RS.group = x.dataset.g; RS.unit = null; RS.model = false; renderRentDetail(`[data-g="${CSS.escape(x.dataset.g)}"]`); });
+  $('rentDetail').querySelectorAll('tr[data-u]').forEach(tr => {
+    const pick = () => { RS.unit = tr.dataset.u; RS.model = false; renderRentDetail(); const t = document.querySelector(`tr[data-u="${CSS.escape(RS.unit)}"]`); if (t) t.focus({preventScroll:true}); document.querySelector('.rmodel').scrollIntoView({block:'nearest'}); };
+    tr.onclick = pick; tr.onkeydown = e => { if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); pick(); } };
+  });
+  if ($('rLoadModel')) $('rLoadModel').onclick = () => { RS.model = true; renderRentDetail('.rmodel'); document.querySelector('.rmodel').scrollIntoView({block:'start'}); };
+  if (focusSel){ const f = $('rentDetail').querySelector(focusSel); if (f) f.focus({preventScroll:true}); }
+}
+$('rQ').addEventListener('input', e => { RS.q = e.target.value.trim(); renderRent(); });
+[['rStatus','status'],['rStar','star'],['rRooms','rooms']].forEach(([id, k]) => document.querySelectorAll(`#${id} button`).forEach(x => x.onclick = () => { RS[k] = x.dataset.v; renderRent(); }));
+$('rFold').onclick = () => { const o = $('rBar').classList.toggle('unfold'); $('rFold').setAttribute('aria-expanded', o); $('rFold').textContent = o ? '조건 접기' : '조건 펼치기'; };
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && RS.open && document.body.classList.contains('rent') && !$('detail').classList.contains('open')) closeRent(); });
 </script>
 </body>
 </html>
