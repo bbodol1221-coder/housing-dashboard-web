@@ -1264,8 +1264,18 @@ $('xlsBtn').onclick = async () => {
     X.utils.book_append_sheet(wb, ws, '우선순위');
     X.utils.book_append_sheet(wb, ws2, '조건');
     const d = new Date(), ymd = `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`;
-    X.writeFile(wb, `우리집찾기_우선순위_${ymd}.xlsx`);
-  } catch(e){ alert(e.message); }
+    const fname = `우리집찾기_우선순위_${ymd}.xlsx`;
+    if (window.showSaveFilePicker){
+      // 크롬·엣지(PC): 저장 위치와 파일 이름을 고르는 창을 띄운다
+      const h = await showSaveFilePicker({suggestedName: fname,
+        types: [{description: '엑셀 파일', accept: {'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx']}}]});
+      const w = await h.createWritable();
+      await w.write(X.write(wb, {bookType: 'xlsx', type: 'array'}));
+      await w.close();
+    } else {
+      X.writeFile(wb, fname);   // 사파리·휴대폰: 브라우저 기본 다운로드 위치
+    }
+  } catch(e){ if (e.name !== 'AbortError') alert(e.message); }   // 저장 창에서 취소하면 조용히 끝낸다
   finally { btn.disabled = false; btn.textContent = '엑셀 내보내기'; }
 };
 
