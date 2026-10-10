@@ -196,6 +196,13 @@ main{min-height:0;overflow-y:auto}
 .splitter span{width:44px;height:5px;border-radius:3px;background:var(--t6);transition:background .15s,width .15s}
 .splitter:hover span,.splitter.drag span,.splitter:focus-visible span{background:var(--blue);width:64px}
 body.resizing{cursor:row-resize;user-select:none}
+.pop .leaflet-popup-content-wrapper{background:var(--surface);color:var(--t2);border-radius:14px;box-shadow:var(--shadow-hi);padding:0}
+.pop .leaflet-popup-content{margin:0;font-size:.8rem;line-height:1.55}
+.pop .leaflet-popup-tip{background:var(--surface)}
+.pcard{padding:12px 14px;cursor:pointer;border-radius:14px;min-width:200px}
+.pcard:hover{background:var(--fill-2)}
+.pcard .t{font-weight:700;color:var(--t1);margin-bottom:2px}
+.pcard .go{margin-top:8px;color:var(--blue);font-weight:700}
 .sub-tip{font-size:.8rem;font-weight:500}
 .legend .ramp{display:flex;align-items:center;gap:5px;margin-top:6px;font-weight:500;color:var(--t5)}
 .legend .ramp i{width:12px;height:12px;border-radius:50%;display:inline-block}
@@ -459,6 +466,7 @@ body.loan aside .sec:not(:first-child){display:none}
     <p class="hint">통근 점수는 두 사람 통근시간의 평균과 더 긴 쪽을 반반 섞어요. 한 사람만 오래 걸리는 집은 점수가 깎여요.</p>
     <p class="hint">평수 점수는 예산 안에서 살 수 있는 가장 넓은 평형의 전용면적이 넓을수록 높아요.</p>
     <p class="hint">매매가는 최근 시세예요. 마지막 거래 전 3개월 안에 2건 이상 거래가 있으면 그 중위값, 없으면 1년 중위값이에요.</p>
+    <p class="hint">지도에서 구를 누르면 그 구 단지만 보여요. 같은 구를 다시 누르면 풀려요. 점을 누르면 요약 카드가 뜨고, 카드를 누르면 자세히 볼 수 있어요.</p>
     <p class="hint">세대수 정보가 아직 없는 단지는 단지 규모 조건에서 빼지 않아요.</p>
     <p class="hint">대출 규제(LTV·금액 상한·DSR)는 2025년 10·15 대책 기준이에요(2026년 10월 확인). 실제 대출 전에 은행에서 꼭 확인하세요.</p>
   </section>
@@ -713,7 +721,16 @@ if (window.SEOUL_GG){
     lyr.bindTooltip(short(f.properties.name), {permanent:true, direction:'center', className:'gu-label'});
     lyr.on('mouseover', () => lyr.setStyle({color: css('--t3'), weight: 2, opacity: 1}));
     lyr.on('mouseout', () => lyr.setStyle(lineStyle(f)));
-    lyr.on('click', () => map.fitBounds(lyr.getBounds(), {padding:[24,24]}));
+    lyr.on('click', () => {
+      // 구를 누르면 그 구로 확대하고 구·시 필터도 건다. 같은 구를 다시 누르면 필터를 푼다
+      map.fitBounds(lyr.getBounds(), {padding:[24,24]});
+      const sel = $('gu'), key = f.properties.name.replace(/\s+/g, '');
+      const opt = [...sel.options].find(o => o.value && o.value.replace(/\s+/g, '') === key);
+      if (!opt) return;
+      sel.value = sel.value === opt.value ? '' : opt.value;
+      if (sel.value) document.querySelectorAll('#sidoSeg button').forEach(x => x.classList.toggle('on', x.dataset.v === 'all'));
+      draw(true);
+    });
   }}).addTo(map);
   const world = [[-85,-180],[-85,180],[85,180],[85,-180]];   // ±90°는 메르카토르 투영에서 무한대가 됨
   const outer = g => (g.type === 'Polygon' ? [g.coordinates] : g.coordinates).map(p => p[0].map(([x,y]) => [y,x]));
@@ -817,14 +834,24 @@ function renderMap(rows){
     const i = r.score >= cut[2] ? 3 : r.score >= cut[1] ? 2 : r.score >= cut[0] ? 1 : 0;
     L.circleMarker([r.c.lat, r.c.lng], {radius: SEL===r.c.id ? 8 : 5, color: css('--surface'), weight: 1.5, fillColor: ramp[i], fillOpacity: .95})
       .bindTooltip(tipHTML(r), {className:'tip', direction:'top', offset:[0,-4]})
-      .on('click', () => select(r.c.id, false)).addTo(dotLayer);
+      .on('click', e => openCard(r, e.latlng)).addTo(dotLayer);
   }
   for (const r of rows.filter(r => r.rank <= 3)){
     L.marker([r.c.lat, r.c.lng], {zIndexOffset:1000, icon:L.divIcon({className:'',
       html:`<span class="mk-top"><span class="rk">${r.rank}</span>${esc(r.c.name)}</span>`, iconAnchor:[10,12]})})
       .bindTooltip(tipHTML(r), {className:'tip', direction:'top', offset:[0,-10]})
-      .on('click', () => select(r.c.id, false)).addTo(topLayer);
+      .on('click', () => openCard(r, [r.c.lat, r.c.lng])).addTo(topLayer);
   }
+}
+// 점을 누르면 요약 카드가 뜨고, 카드를 누르면 단지 상세로 넘어간다
+function openCard(r, ll){
+  select(r.c.id, false);
+  const el = document.createElement('div');
+  el.className = 'pcard'; el.tabIndex = 0; el.setAttribute('role', 'button');
+  el.innerHTML = tipHTML(r) + '<div class="go">자세히 보기 ›</div>';
+  const go = () => { map.closePopup(); openDetail(r.c.id); };
+  el.onclick = go; el.onkeydown = e => { if (e.key === 'Enter') go(); };
+  L.popup({className:'pop', closeButton:false, offset:[0,-4], autoPanPadding:[24,24]}).setLatLng(ll).setContent(el).openOn(map);
 }
 const tipHTML = r => `<div class="t">${FAV[r.c.id] ? '♥ ' : ''}${r.rank}위 · ${esc(r.c.name)}</div>${esc(r.c.region)} ${esc(r.c.umd)}<br>
   점수 <b class="num">${r.score.toFixed(1)}</b> · ${fmtEok(r.unit.price)} · 월 ${Math.round(r.pay)}만원<br>${cmtHTML(r.c)}`;
