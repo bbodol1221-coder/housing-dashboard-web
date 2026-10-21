@@ -223,6 +223,11 @@ body.resizing{cursor:row-resize;user-select:none}
 .sub-tip{font-size:.8rem;font-weight:500}
 .legend .ramp{display:flex;align-items:center;gap:5px;margin-top:6px;font-weight:500;color:var(--t5)}
 .legend .ramp i{width:12px;height:12px;border-radius:50%;display:inline-block}
+.legend [hidden]{display:none !important}
+.legend .cmode{display:flex;gap:4px}.legend .cmode button{border:1px solid var(--divider);background:transparent;color:var(--t4);border-radius:8px;padding:4px 8px;font:inherit;font-size:.75rem;cursor:pointer}
+.legend .cmode button.on{background:var(--blue);border-color:var(--blue);color:#fff;font-weight:600}
+.legend .cgrad{height:8px;border-radius:4px;margin-top:8px;width:200px;background:linear-gradient(90deg,#1aa34a,#8bc34a,#f5c400,#ff8a00,#f04452,#9c27b0,#5b3fd6)}
+.legend .mticks{display:flex;justify-content:space-between;width:200px;font-size:.7rem;color:var(--t5);margin-top:3px}
 .mk-anchor{border-radius:10px;padding:4px 10px;font-size:.76rem;font-weight:700;color:#fff;white-space:nowrap;
   box-shadow:0 2px 8px rgba(0,0,0,.25)}
 .mk-anchor.j{background:var(--jamsil)}.mk-anchor.p{background:var(--pangyo)}
@@ -322,6 +327,13 @@ td.dc{width:60px;padding-right:14px}
 .chart .pt:hover{r:6}
 .chart .med{stroke:var(--t4);stroke-width:1.5;stroke-dasharray:4 4}
 .chart .bar{fill:var(--seq-2)}
+.chart .hline{fill:none;stroke:var(--blue);stroke-width:2;opacity:.6}
+.hnote{padding:40px 0;text-align:center;color:var(--t5);font-size:.85rem}
+.mavg{font-size:.85rem;color:var(--t4);margin:-2px 0 8px}.mavg b{color:var(--t1);font-size:1.05rem;margin:0 4px}.mavg small{color:var(--t5)}
+.dt-h.hx{flex-wrap:wrap}.dt-h.hx .hxt{white-space:nowrap}.dt-h.hx small{order:3;flex-basis:100%}
+.rseg button{white-space:nowrap}
+.rseg{margin-left:auto;display:inline-flex;gap:4px}.rseg button{border:1px solid var(--divider);background:transparent;color:var(--t4);border-radius:8px;padding:3px 10px;font:inherit;font-size:.78rem;cursor:pointer}
+.rseg button.on{background:var(--blue);border-color:var(--blue);color:#fff;font-weight:600}
 .ctip{position:absolute;pointer-events:none;background:var(--surface);color:var(--t2);border-radius:10px;padding:6px 10px;font-size:.78rem;
   box-shadow:var(--shadow-hi);white-space:nowrap;transform:translate(-50%,-120%);display:none}
 .chips{display:flex;flex-wrap:wrap;gap:8px}
@@ -601,8 +613,10 @@ body.rent main{grid-column:1/-1}
   <section class="top3" id="top3"></section>
   <div class="mapwrap">
     <div id="map"></div>
-    <div class="legend">종합 점수
-      <div class="ramp">낮음 <i style="background:var(--seq-1)"></i><i style="background:var(--seq-2)"></i><i style="background:var(--seq-3)"></i><i style="background:var(--seq-4)"></i> 높음</div>
+    <div class="legend">
+      <div class="cmode" id="cmode" role="group" aria-label="지도 색 기준"><button type="button" data-m="score" class="on">종합 점수</button><button type="button" data-m="jamsil">잠실 출근</button><button type="button" data-m="pangyo">판교 출근</button></div>
+      <div class="ramp" id="rampScore">낮음 <i style="background:var(--seq-1)"></i><i style="background:var(--seq-2)"></i><i style="background:var(--seq-3)"></i><i style="background:var(--seq-4)"></i> 높음</div>
+      <div id="rampMin" hidden><div class="cgrad"></div><div class="mticks num"><span>10분</span><span>30</span><span>50</span><span>70분+</span></div></div>
     </div>
   </div>
   <div class="splitter" id="splitter" role="separator" aria-orientation="horizontal" aria-label="지도와 단지 목록 높이 조절" tabindex="0"><span></span></div>
@@ -976,6 +990,23 @@ function renderDuo(I){
   bindDetail($('duo'));
 }
 
+// 지도 색 기준: 종합 점수 또는 한 직장까지의 출근 시간(초록 10분 → 보라 70분 이상)
+let CMODE = 'score';
+const MIN_STOPS = [[10,[26,163,74]],[20,[139,195,74]],[30,[245,196,0]],[40,[255,138,0]],[50,[240,68,82]],[60,[156,39,176]],[70,[91,63,214]]];
+function minColor(m){
+  if (m <= MIN_STOPS[0][0]) return `rgb(${MIN_STOPS[0][1]})`;
+  for (let i = 1; i < MIN_STOPS.length; i++){
+    const [a, ca] = MIN_STOPS[i-1], [b, cb] = MIN_STOPS[i];
+    if (m <= b){ const t = (m-a)/(b-a); return `rgb(${ca.map((v,j) => Math.round(v + (cb[j]-v)*t))})`; }
+  }
+  return `rgb(${MIN_STOPS.at(-1)[1]})`;
+}
+document.querySelectorAll('#cmode button').forEach(b => b.onclick = () => {
+  CMODE = b.dataset.m;
+  document.querySelectorAll('#cmode button').forEach(x => x.classList.toggle('on', x === b));
+  $('rampScore').hidden = CMODE !== 'score'; $('rampMin').hidden = CMODE === 'score';
+  renderMap(ROWS);
+});
 function renderMap(rows){
   dotLayer.clearLayers(); topLayer.clearLayers();
   const ramp = ['--seq-1','--seq-2','--seq-3','--seq-4'].map(css);
@@ -984,7 +1015,8 @@ function renderMap(rows){
   for (const r of rows){
     if (r.rank <= 3) continue;
     const i = r.score >= cut[2] ? 3 : r.score >= cut[1] ? 2 : r.score >= cut[0] ? 1 : 0;
-    L.circleMarker([r.c.lat, r.c.lng], {radius: SEL===r.c.id ? 8 : 5, color: css('--surface'), weight: 1.5, fillColor: ramp[i], fillOpacity: .95})
+    const fill = CMODE === 'score' ? ramp[i] : minColor(r.c.commute[CMODE].min);
+    L.circleMarker([r.c.lat, r.c.lng], {radius: SEL===r.c.id ? 8 : 5, color: css('--surface'), weight: 1.5, fillColor: fill, fillOpacity: .95})
       .bindTooltip(tipHTML(r), {className:'tip', direction:'top', offset:[0,-4]})
       .on('click', e => openCard(r, e.latlng)).addTo(dotLayer);
   }
@@ -1274,19 +1306,62 @@ function renderDetailBody(c, I, d){
         return `<tr class="u ${i===DT.unitIdx?'on':''}" data-u="${i}"><td class="num">${x.area}㎡</td><td class="num">${fmtEok(x.price)}</td><td class="num">${fmtEok(x.median)}</td>
         <td class="num">${trendHTML(x.trend)}</td><td class="num">${x.n}건</td><td class="num">${bb.feasible ? Math.round(bb.pay) + '만' : '<span class="pill-out">예산 초과</span>'}</td></tr>`; }).join('')}
     </tbody></table>
-    <div class="dt-h">실거래 기록 <small>전용 ${u.area}㎡ · 점 하나가 거래 한 건, 점선은 최근 시세</small></div>
-    <div class="chart" id="dtChart">${dealChart(u)}<div class="ctip" id="ctip"></div></div>
+    <div class="dt-h hx"><span class="hxt">실거래 기록</span> <small>전용 ${u.area}㎡ · ${DT.range === '3y' ? '점 하나가 한 달 중위가' : '점 하나가 거래 한 건, 점선은 최근 시세'}</small>
+      <span class="rseg" role="group" aria-label="기간"><button type="button" data-r="1y" class="${DT.range !== '3y' ? 'on' : ''}">1년</button><button type="button" data-r="3y" class="${DT.range === '3y' ? 'on' : ''}">3년</button></span></div>
+    ${monthAvgHTML(u)}
+    <div class="chart" id="dtChart">${DT.range === '3y' ? historyChart(c, u) : dealChart(u)}<div class="ctip" id="ctip"></div></div>
     ${c.monthly ? `<div class="dt-h">월별 거래량 <small>단지 전체 · 최근 12개월</small></div><div class="chart">${volumeChart(c.monthly)}</div>` : ''}
     <div class="dt-h">반경 500m 생활 편의 <small>소상공인 상가정보 기준</small></div>
     <div class="chips">${['카페','스타벅스','헬스','병의원','약국','편의점','마트'].filter(k => cv[k] != null)
       .map(k => `<span>${k} <b class="num">${cv[k].toLocaleString()}</b></span>`).join('') || '<span>정보 없음</span>'}</div>`;
   $('dtBody').querySelectorAll('tr.u').forEach(tr => tr.onclick = () => { DT.unitIdx = +tr.dataset.u; renderDetailBody(c, I, d); });
+  $('dtBody').querySelectorAll('.rseg button').forEach(b => b.onclick = () => {
+    DT.range = b.dataset.r;
+    if (DT.range === '3y' && !window.TRADE_HISTORY) loadHistory(() => renderDetailBody(c, I, d));
+    renderDetailBody(c, I, d);
+  });
   const tip = $('ctip');
   $('dtBody').querySelectorAll('#dtChart .pt').forEach(pt => {
     pt.onmouseenter = () => { tip.style.display = 'block'; tip.style.left = pt.getAttribute('data-x') + '%'; tip.style.top = pt.getAttribute('data-y') + '%';
       tip.textContent = pt.getAttribute('data-t'); };
     pt.onmouseleave = () => tip.style.display = 'none';
   });
+}
+// 최근 1개월 평균: 마지막 거래일부터 30일 안의 거래 평균
+function monthAvgHTML(u){
+  const t = d => Date.UTC(2000 + +d.slice(0,2), +d.slice(2,4) - 1, +d.slice(4,6));
+  const last = t(u.deals.at(-1)[0]);
+  const ps = u.deals.filter(([d]) => last - t(d) <= 30*864e5).map(x => x[1]);
+  const avg = ps.reduce((a, b) => a + b, 0) / ps.length;
+  return `<div class="mavg">최근 실거래 기준 1개월 평균 <b class="num">${fmtEok(avg)}</b> <small>${ps.length}건 · 마지막 거래 ${u.deals.at(-1)[0].replace(/(..)(..)(..)/, '$1.$2.$3')}</small></div>`;
+}
+// 3년 흐름 데이터는 상세에서 처음 고를 때 한 번만 불러온다(첫 화면 용량 절약)
+function loadHistory(done){
+  if (loadHistory.busy) return; loadHistory.busy = true;
+  const sc = document.createElement('script'); sc.src = 'trade_history.js';
+  sc.onload = done; sc.onerror = () => { window.TRADE_HISTORY = {}; done(); };
+  document.head.appendChild(sc);
+}
+function historyChart(c, u){
+  if (!window.TRADE_HISTORY) return '<div class="hnote">3년 기록을 불러오는 중…</div>';
+  const h = (window.TRADE_HISTORY[c.id] || {})[String(Math.round(u.area))];
+  if (!h || h.length < 2) return '<div class="hnote">이 평형은 3년 기록이 충분하지 않아요</div>';
+  const W = 620, H = 220, L = 44, R = 12, T = 12, B = 26;
+  const ym = m => Date.UTC(2000 + +m.slice(0,2), +m.slice(2,4) - 1, 15);
+  const ps = h.map(([m, pr, n]) => ({t: ym(m), pr, n, m}));
+  const t0 = ps[0].t, t1 = ps.at(-1).t, span = Math.max(t1 - t0, 30*864e5);
+  let lo = Math.min(...ps.map(p => p.pr)), hi = Math.max(...ps.map(p => p.pr));
+  const pad = Math.max((hi - lo) * 0.15, hi * 0.03); lo -= pad; hi += pad;
+  const x = t => L + (t - t0) / span * (W - L - R), y = v => T + (hi - v) / (hi - lo) * (H - T - B);
+  const ticks = [lo + (hi-lo)*0.15, (lo+hi)/2, hi - (hi-lo)*0.15];
+  const fmtM = m => `${m.slice(0,2)}.${m.slice(2,4)}`;
+  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="3년 월별 중위 실거래가">
+    ${ticks.map(v => `<line class="grid" x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}"/><text class="ax" x="${L-6}" y="${y(v)+3}" text-anchor="end">${fmtEok(v)}</text>`).join('')}
+    <polyline class="hline" points="${ps.map(p => `${x(p.t)},${y(p.pr)}`).join(' ')}"/>
+    <text class="ax" x="${L}" y="${H-8}">${fmtM(ps[0].m)}</text><text class="ax" x="${W-R}" y="${H-8}" text-anchor="end">${fmtM(ps.at(-1).m)}</text>
+    ${ps.map(p => `<circle class="pt" r="${Math.min(3 + p.n, 7)}" cx="${x(p.t)}" cy="${y(p.pr)}" data-x="${x(p.t)/W*100}" data-y="${y(p.pr)/H*100}"
+       data-t="${fmtM(p.m)} · 중위 ${fmtEok(p.pr)} · ${p.n}건"/>`).join('')}
+  </svg>`;
 }
 function dealChart(u){
   const W = 620, H = 220, L = 44, R = 12, T = 12, B = 26;
