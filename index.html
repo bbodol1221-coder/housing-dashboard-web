@@ -281,6 +281,19 @@ tr.top .rpill{background:var(--blue);color:#fff}
 
 /* ── 지역 선택 (세그먼트) ── */
 .seg{display:flex;padding:3px;border-radius:12px;background:var(--fill);margin-bottom:6px}
+.mtog{display:flex;gap:6px;margin-bottom:6px}.mtog button{flex:1;height:38px;border-radius:10px;border:1px solid var(--divider);background:transparent;color:var(--t4);font:inherit;font-weight:600;cursor:pointer}
+.mtog button[aria-pressed="true"]{background:var(--blue);border-color:var(--blue);color:#fff}
+.mtog button[aria-pressed="true"]::before{content:'✓ '}
+/* 표 고정: 위아래로 내려도 머리글 줄, 좌우로 밀어도 첫 열(상세 표)·앞쪽 열(단지 목록)이 남는다 */
+.utscroll,.utwrap{overflow:auto;max-height:340px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+.utbl thead th,.utable thead th{position:sticky;top:0;z-index:2;background:var(--surface)}
+.utbl th:first-child,.utbl td:first-child,.utable th:first-child,.utable td:first-child{position:sticky;left:0;z-index:1;background:var(--surface)}
+.utbl thead th:first-child,.utable thead th:first-child{z-index:3}
+.utbl tr.on td:first-child,.utable tr[aria-selected="true"] td:first-child{background:var(--blue-soft)}
+.fz{position:sticky;z-index:1;background:var(--surface)}
+thead th.fz{z-index:3}
+tbody tr.sel td.fz{background:var(--blue-soft)}
+.tscroll{overscroll-behavior:contain}
 .seg button{flex:1;height:34px;border:0;border-radius:9px;background:transparent;font-size:.88rem;font-weight:600;color:var(--t4);cursor:pointer}
 .seg button.on{background:var(--surface);color:var(--t1);box-shadow:0 1px 3px rgba(0,0,0,.08)}
 
@@ -588,12 +601,14 @@ body.rent main{grid-column:1/-1}
 <aside id="aside">
   <section class="sec">
     <h2>예산</h2>
+    <div class="mtog" id="modeSeg" role="group" aria-label="보고 싶은 거래 (둘 다 고를 수 있어요)"><button type="button" data-v="buy" aria-pressed="true">매매</button><button type="button" data-v="rent" aria-pressed="false">전월세</button></div>
+    <p class="hint" style="margin:-2px 0 8px">둘 다 고르면 단지마다 월 비용이 적은 쪽으로 순위를 매기고, 다른 쪽도 함께 보여 줘요. 전월세는 지금 전세 기준이에요(월세는 아직 반영 안 됨).</p>
     <div class="field"><label for="own">모아둔 돈</label><span class="box"><input type="number" id="own" value="" placeholder="예: 1.5" step="0.1" min="0"><span class="u">억</span></span></div>
     <div class="field"><label for="income">부부 합산 연소득</label><span class="box"><input type="number" id="income" value="" placeholder="예: 1.15" step="0.05" min="0"><span class="u">억</span></span></div>
     <label class="switch">생애최초 주택 구입<input type="checkbox" id="first" checked></label>
     <div class="field"><label for="rate">대출 금리</label><span class="box"><input type="number" id="rate" value="4.0" step="0.1"><span class="u">%</span></span></div>
     <div class="field"><label for="years">대출 기간</label><span class="box"><input type="number" id="years" value="30" step="5"><span class="u">년</span></span></div>
-    <div class="budget"><div class="bl" style="margin-bottom:6px">예상 구매 가능액 <span style="color:var(--warn-t);font-weight:600">추정</span></div><div id="budgetbox"></div></div>
+    <div class="budget"><div class="bl" style="margin-bottom:6px"><span id="bTitle">예상 구매 가능액</span> <span style="color:var(--warn-t);font-weight:600">추정</span></div><div id="budgetbox"></div></div>
   </section>
 
   <section class="sec">
@@ -609,7 +624,9 @@ body.rent main{grid-column:1/-1}
     <div class="field"><label for="minHH">단지 규모</label><span class="box"><input type="number" id="minHH" value="100" step="50"><span class="u">세대 이상</span></span></div>
     <label class="switch">오피스텔형 건물 제외<input type="checkbox" id="noOffice" checked></label>
     <label class="switch">예산 넘는 단지도 보기<input type="checkbox" id="showOver"></label>
-    <div class="field"><label for="maxPay">월 상환 상한</label><span class="box"><input type="number" id="maxPay" value="" placeholder="제한 없음" step="10"><span class="u">만원</span></span></div>
+    <div class="field"><label for="maxPay">월 비용 상한</label><span class="box"><input type="number" id="maxPay" value="" placeholder="제한 없음" step="10"><span class="u">만원</span></span></div>
+    <div class="field"><label for="maxBurden">소득 대비 월 비용</label><span class="box"><input type="number" id="maxBurden" value="" placeholder="제한 없음" step="5" min="0"><span class="u">% 이하</span></span></div>
+    <p class="hint" style="margin-top:4px">월 비용은 매매면 원리금 상환, 전세면 전세대출 이자예요. 소득 대비 비율은 연소득을 넣어야 적용돼요(흔히 30% 이하를 권해요).</p>
   </section>
 
   <section class="sec">
@@ -748,7 +765,8 @@ function readInputs(){
   METRICS.forEach(m => W[m.key] = n('w_' + m.key));
   const eok = id => $(id).value.trim() === '' ? null : parseFloat($(id).value) * 10000;   // 억 → 만원, 비우면 null
   return {own:eok('own'), income:eok('income'), first:$('first').checked, rate:n('rate'), years:n('years'),
-          maxCommute:n('maxCommute'), minArea:n('minArea'), minDeals:n('minDeals')||1, minBuilt:n('minBuilt')||0, minHH:n('minHH')||0, noOffice: $('noOffice').checked, showOver: $('showOver').checked, sido: document.querySelector('#sidoSeg .on').dataset.v, gu: $('gu').value, q: $('q').value.trim(), maxPay:$('maxPay').value ? n('maxPay') : Infinity};
+          maxCommute:n('maxCommute'), minArea:n('minArea'), minDeals:n('minDeals')||1, minBuilt:n('minBuilt')||0, minHH:n('minHH')||0, noOffice: $('noOffice').checked, showOver: $('showOver').checked, sido: document.querySelector('#sidoSeg .on').dataset.v, gu: $('gu').value, q: $('q').value.trim(), maxPay:$('maxPay').value ? n('maxPay') : Infinity,
+          modes: [...document.querySelectorAll('#modeSeg [aria-pressed="true"]')].map(b => b.dataset.v), maxBurden: $('maxBurden').value ? n('maxBurden') : null};
 }
 
 // ── 대출 계산 ──
@@ -774,6 +792,26 @@ function purchase(P, regulated, I){
   const limit = loanLimit(P, regulated, I);
   return {feasible: need <= limit + 1e-6, loan: need, pay: need * payFactor(I.rate, I.years)};
 }
+// 전세대출: HF 일반전세자금보증 기준 — 한도는 보증금의 80%와 4억 중 적은 금액(상환능력 심사는 은행마다 달라 미반영).
+// 출처: hf.go.kr 일반전세자금보증, khug.or.kr 전세금안심대출보증 (2026-10-21 확인). 이자만 낸다고 보고 월 비용 = 대출 × 금리 ÷ 12
+const JEONSE_LTV = 0.8, JEONSE_CAP = 40000;
+function jeonseFin(dep, I){
+  if (noBudget(I)) return {feasible: true, loan: 0, pay: 0, limit: Infinity};
+  const need = Math.max(0, dep - I.own), limit = Math.min(dep * JEONSE_LTV, JEONSE_CAP);
+  return {feasible: need <= limit + 1e-6, loan: need, pay: need * I.rate / 100 / 12, limit};
+}
+const maxJeonse = I => Math.min(I.own / (1 - JEONSE_LTV), I.own + JEONSE_CAP);
+// 소득 대비 월 비용(%) — 연소득을 넣었을 때만
+const burden = (pay, I) => I.income ? pay / (I.income / 12) * 100 : null;
+const burdenText = (pay, I) => { const b = burden(pay, I); return b == null || noBudget(I) ? '' : ` · 소득의 ${Math.round(b)}%`; };
+// 버팀목 전세자금 소득 기준 안내만(계산 미반영): 일반 부부합산 5천만원·신혼부부 1억원 이하 (국토부 2024 발표, 2026-10-21 확인)
+function jeonsePolicyHint(I){
+  if (!I.income) return '연소득을 넣으면 정책 전세대출 소득 기준에 드는지 알려 드려요.';
+  if (I.income <= 5000) return '연소득이 버팀목 전세자금 일반 소득 기준(5천만원 이하)에 들어요. 금리가 더 낮을 수 있어요.';
+  if (I.income <= 10000) return '신혼부부라면 버팀목 전세자금 소득 기준(1억원 이하)에 들어요. 금리가 더 낮을 수 있어요.';
+  return '연소득이 버팀목 전세자금 소득 기준(신혼부부 1억원 이하)을 넘어요. 일반 전세대출 기준으로 봤어요.';
+}
+const priceOf = r => r.dep != null ? '전세 ' + fmtEok(r.dep) : fmtEok(r.unit.price);
 function maxPrice(regulated, I){
   let lo = 0, hi = 300000;
   for (let i = 0; i < 50; i++){ const m = (lo+hi)/2; purchase(m, regulated, I).feasible ? lo = m : hi = m; }
@@ -799,24 +837,38 @@ function evaluate(I){
     if (c.hh != null && c.hh < I.minHH) continue;
     if (I.noOffice && isOffice(c)) continue;   // 세대수 정보가 없는 단지는 통과
     // 예산 안에서 가장 넓은 평형 (중위 실거래가 기준)
+    const pick = mode => {
     let best = null, over = null;
     for (const u of c.units){
-      if (u.area < I.minArea || u.n < I.minDeals) continue;
-      const b = purchase(u.price, c.regulated, I);
+      let b, dep = null;
+      if (mode === 'rent'){
+        const j = jeonseOf(c, u.area);
+        if (!j || u.area < I.minArea || j[1] < I.minDeals) continue;   // 전세 모드: 최근 1년 전세 건수로 거름
+        dep = j[0]; b = jeonseFin(dep, I);
+      } else {
+        if (u.area < I.minArea || u.n < I.minDeals) continue;
+        b = purchase(u.price, c.regulated, I);
+      }
       if (!b.feasible){   // 예산 초과: 스위치가 켜져 있으면 가장 싼 평형을 후보로 둔다
-        if (I.showOver && (!over || u.price < over.u.price)) over = {u, b};
+        if (I.showOver && (!over || (dep ?? u.price) < (over.dep ?? over.u.price))) over = {u, b, dep};
         continue;
       }
       if (!noBudget(I) && b.pay > I.maxPay) continue;
-      if (!best || u.area > best.u.area) best = {u, b};
+      if (!noBudget(I) && I.maxBurden != null && burden(b.pay, I) != null && burden(b.pay, I) > I.maxBurden) continue;
+      if (!best || u.area > best.u.area) best = {u, b, dep};
     }
-    if (!best && over) best = {...over, short: over.b.loan - loanLimit(over.u.price, c.regulated, I)};
+    if (!best && over) best = {...over, short: over.b.loan - (over.dep != null ? over.b.limit : loanLimit(over.u.price, c.regulated, I))};
+    return best && {...best, mode};
+    };
+    // 매매·전월세를 함께 고르면 둘 다 계산해, 예산 안에 드는 쪽 중 월 비용이 적은 쪽으로 순위를 매기고 다른 쪽은 함께 보여 준다
+    const opts = I.modes.map(pick).filter(Boolean).sort((a, b) => (a.short > 0) - (b.short > 0) || (noBudget(I) ? 0 : a.b.pay - b.b.pay));
+    const best = opts[0], other = opts[1] || null;
     if (!best) continue;
     const conv = c.conv ? 0.4*c.conv['생활편의_개수'] + 0.3*c.conv['의료_개수'] + 0.15*c.conv['교육_개수'] + 0.15*c.conv['문화_개수'] : null;
-    rows.push({c, unit:best.u, loan:best.b.loan, pay:best.b.pay, short:best.short || 0,
+    rows.push({c, unit:best.u, dep:best.dep, mode:best.mode, other, loan:best.b.loan, pay:best.b.pay, short:best.short || 0,
       raw:{
         commute: 0.5*(j.min+p.min)/2 + 0.5*Math.max(j.min, p.min),
-        cost: noBudget(I) ? best.u.price : best.b.pay,   // 예산 미입력이면 집값이 쌀수록 좋게
+        cost: noBudget(I) ? (best.dep ?? best.u.price) : best.b.pay,   // 예산 미입력이면 집값이 쌀수록 좋게
         transit: (j.transfers + p.transfers)/2 + ((j.walk + p.walk)/2)/10,  // 환승 1회 ≈ 도보 10분
         conv,
         area: best.u.area,   // 예산 안 가장 넓은 평형의 전용면적
@@ -898,7 +950,8 @@ if (window.SEOUL_GG){
     // 서울·경기 밖으로는 끌거나 축소해도 나가지 않게 고정
     map.setMaxBounds(BOUNDS);
     map.setMinZoom(map.getZoom());
-    map.on('resize', () => map.setMinZoom(map.getBoundsZoom(BOUNDS)));
+    window.addEventListener('resize', () => freezeCols($('tbody').closest('table')));
+map.on('resize', () => map.setMinZoom(map.getBoundsZoom(BOUNDS)));
   });
   // 구(경기는 시·군, 일반구가 있는 시는 구) 경계: 이름 라벨 + 클릭하면 그 구로 확대
   const lineStyle = f => ({color: css('--t5'), weight: f.properties.code.startsWith('11') ? 0.8 : 1, opacity:.7,
@@ -948,7 +1001,7 @@ const COLS = [
   {k:'region', t:'지역'},
   {k:'score', t:'점수', r:true},
   {k:'commute', t:'통근 추정 (잠실 · 판교)', r:true, tip: '대중교통 최단 경로 추정 · 목적지 역 기준'},
-  {k:'price', t:'매매가', r:true},
+  {k:'price', t:'가격', r:true},
   {k:'area', t:'전용', r:true},
   {k:'pay', t:'월 상환', r:true},
   {k:'transfers', t:'평균 환승', r:true},
@@ -958,7 +1011,7 @@ const COLS = [
 ];
 const getters = {
   fav:r=>FAV[r.c.id] ? 1 : 0, rank:r=>r.rank, name:r=>r.c.name, region:r=>r.c.region, score:r=>r.score,
-  commute:r=>r.raw.commute, price:r=>r.unit.price, area:r=>r.unit.area, pay:r=>r.pay,
+  commute:r=>r.raw.commute, price:r=>r.dep ?? r.unit.price, area:r=>r.unit.area, pay:r=>r.pay,
   transfers:r=>(r.c.commute.jamsil.transfers + r.c.commute.pangyo.transfers)/2, built:r=>r.c.built || 0,
   trend:r=>r.unit.trend ?? -999, detail:r=>0,
 };
@@ -967,7 +1020,19 @@ const overFlag = r => r.short > 0 ? `<span class="flag over">현금 ${fmtEok(r.s
 const CMT_TIP = '대중교통 최단 경로 추정이에요. 목적지 역 좌표 기준이라 출입구·출근 시간대 실제 소요와 달라요';
 const cmtHTML = c => `<span class="cmt num" title="${CMT_TIP}"><span class="lb j">잠실</span><span class="cj">${Math.round(c.commute.jamsil.min)}분</span> · <span class="lb p">판교</span><span class="cp">${Math.round(c.commute.pangyo.min)}분</span></span>`;
 
+let BUDGET_RENT = '';
 function renderBudget(I){
+  const hasBuy = I.modes.includes('buy'), hasRent = I.modes.includes('rent');
+  $('bTitle').textContent = hasBuy && hasRent ? '예산 (매매 · 전세)' : hasRent ? '들어갈 수 있는 전세 보증금' : '예상 구매 가능액';
+  const rentHTML = () => { const mj = maxJeonse(I), loan = Math.max(0, mj - I.own), pay = loan * I.rate / 100 / 12;
+    return `<div class="bl">전세 최대</div><div class="big num">${fmtEok(mj)}</div><div class="sm">전세대출 ${fmtEok(loan)} · 월 이자 <b class="num">${Math.round(pay).toLocaleString()}만원</b>${burdenText(pay, I)}</div>`; };
+  if (!noBudget(I) && hasRent && hasBuy) BUDGET_RENT = rentHTML(); else BUDGET_RENT = '';
+  if (!noBudget(I) && hasRent && !hasBuy){
+    const mj = maxJeonse(I), loan = Math.max(0, mj - I.own), pay = loan * I.rate / 100 / 12;
+    $('budgetbox').innerHTML = `<div class="big num">${fmtEok(mj)}</div><div class="sm">전세대출 ${fmtEok(loan)} · 월 이자 <b class="num">${Math.round(pay).toLocaleString()}만원</b>${burdenText(pay, I)}</div>
+      <div class="foot"><b>추정</b>이에요. 전세대출 한도를 보증금의 ${JEONSE_LTV*100}%·최대 ${fmtEok(JEONSE_CAP)}로 계산했어요(HF 일반전세자금보증 기준). 소득·신용에 따른 은행 심사, 1주택자 제한, 버팀목 같은 정책 대출 조건은 반영하지 않았어요. ${jeonsePolicyHint(I)}</div>`;
+    return;
+  }
   if (noBudget(I)){ $('budgetbox').innerHTML = `<div class="sm">위에 <b>모아둔 돈</b>을 억 단위로 넣으면 살 수 있는 집값을 계산하고, 그 안의 단지만 보여 드려요. 지금은 예산과 상관없이 모든 단지를 보여 주고, '월 상환' 점수 대신 집값이 쌀수록 높게 매겨요.</div>`; return; }
   const reg = maxPrice(true, I), non = maxPrice(false, I);
   const pay = P => Math.max(0, P*(1+ACQ) - I.own) * payFactor(I.rate, I.years);
@@ -976,6 +1041,8 @@ function renderBudget(I){
       <div><div class="bl">서울·경기 규제지역</div><div class="big num">${fmtEok(reg)}</div><div class="sm">월 <b class="num">${Math.round(pay(reg)).toLocaleString()}만원</b></div></div>
       <div><div class="bl">경기 비규제지역</div><div class="big num">${fmtEok(non)}</div><div class="sm">월 <b class="num">${Math.round(pay(non)).toLocaleString()}만원</b></div></div>
     </div>
+    ${BUDGET_RENT ? `<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--divider)">${BUDGET_RENT}</div>` : ''}
+    ${I.income ? `<div class="sm" style="margin-top:8px">규제지역 최대로 사면 월 상환이 <b>소득의 ${Math.round(burden(pay(reg), I))}%</b>예요.</div>` : ''}
     <div class="foot"><b>예상 구매 가능액(추정)</b>이에요. 입력한 돈·소득·금리와 2025년 10·15 대책 규정으로 계산했고, 실제 승인 금액은 은행 심사에 따라 달라요. 한도 기준은 규제지역 ${bindingRule(reg,true,I)}, 비규제지역 ${bindingRule(non,false,I)}이고, 취득 부대비용 ${ACQ*100}%를 반영했어요.</div>`;
 }
 
@@ -987,8 +1054,9 @@ function renderTop(top, robust){
       <div class="score num">${r.score.toFixed(1)}<small>점</small></div>
       <div class="kv">
         <span>통근 <small class="est" title="${CMT_TIP}">역 기준 추정</small></span>${cmtHTML(r.c)}
-        <span>매매가</span><span class="num">${fmtEok(r.unit.price)} · 전용 ${r.unit.area}㎡ · 거래 ${r.unit.n}건</span>
-        <span>월 상환</span><span class="num">${noBudget(LAST_I) ? '예산 입력 전' : `${Math.round(r.pay).toLocaleString()}만원 · 대출 ${fmtEok(r.loan)}`}</span>
+        <span>${r.dep != null ? '전세가' : '매매가'}</span><span class="num">${r.dep != null ? fmtEok(r.dep) : fmtEok(r.unit.price)} · 전용 ${r.unit.area}㎡${r.dep != null ? '' : ` · 거래 ${r.unit.n}건`}</span>
+        <span>${r.dep != null ? '월 이자' : '월 상환'}</span><span class="num">${noBudget(LAST_I) ? '예산 입력 전' : `${Math.round(r.pay).toLocaleString()}만원 · 대출 ${fmtEok(r.loan)}${burdenText(r.pay, LAST_I)}`}</span>
+        ${r.other ? `<span>${r.other.dep != null ? '전세면' : '매매면'}</span><span class="num">${r.other.dep != null ? fmtEok(r.other.dep) : fmtEok(r.other.u.price)} · 전용 ${r.other.u.area}㎡${noBudget(LAST_I) ? '' : r.other.short > 0 ? ' · 예산 초과' : ` · 월 ${Math.round(r.other.b.pay).toLocaleString()}만원`}</span>` : ''}
       </div>
       <div class="why">${why(r)}</div>
       <details class="more" ${innerWidth > 900 ? 'open' : ''}><summary>점수 구성 · 가중치 민감도</summary>
@@ -1008,7 +1076,7 @@ function renderDuo(I){
   const tile = (label, r) => r ? `<div class="tile" data-detail="${esc(r.c.id)}" tabindex="0" role="button" aria-label="${label} 1위 ${esc(r.c.name)} 자세히 보기">
       <span class="lbl">${label} 1위</span>
       <div class="grow"><div class="nm">${esc(r.c.name)}</div>
-        <div class="meta">${esc(r.c.region)} · <b class="num">${fmtEok(r.unit.price)}</b> · 월 <b class="num">${payText(r.pay, LAST_I)}</b> · ${cmtHTML(r.c)}</div></div>
+        <div class="meta">${esc(r.c.region)} · <b class="num">${priceOf(r)}</b> · 월 <b class="num">${payText(r.pay, LAST_I)}</b> · ${cmtHTML(r.c)}</div></div>
       <div class="sc num">${r.score.toFixed(1)}</div></div>`
     : `<div class="tile"><span class="lbl">${label} 1위</span><span class="none">조건에 맞는 단지가 없어요</span></div>`;
   $('duo').innerHTML = tile('서울', ROWS.find(r => r.c.sido === '서울')) + tile('경기', ROWS.find(r => r.c.sido === '경기'));
@@ -1063,7 +1131,7 @@ function openCard(r, ll){
   L.popup({className:'pop', closeButton:false, offset:[0,-4], autoPanPadding:[24,24]}).setLatLng(ll).setContent(el).openOn(map);
 }
 const tipHTML = r => `<div class="t">${FAV[r.c.id] ? '♥ ' : ''}${r.rank}위 · ${esc(r.c.name)}</div>${esc(r.c.region)} ${esc(r.c.umd)}<br>
-  점수 <b class="num">${r.score.toFixed(1)}</b> · ${fmtEok(r.unit.price)} · 월 ${payText(r.pay, LAST_I)}<br>${cmtHTML(r.c)}`;
+  점수 <b class="num">${r.score.toFixed(1)}</b> · ${priceOf(r)} · 월 ${payText(r.pay, LAST_I)}${r.other ? ` <span style="color:var(--t5)">(${r.other.dep != null ? '전세 ' + fmtEok(r.other.dep) : '매매 ' + fmtEok(r.other.u.price)})</span>` : ''}<br>${cmtHTML(r.c)}`;
 
 // 띄어쓰기로 나눈 단어가 모두 들어 있으면 찾는다. '성남 분당', '수원 영통구', '송파'처럼 써도 된다
 function matchQ(c, q){
@@ -1093,7 +1161,7 @@ function renderTable(rows){
       <td class="hc">${heartHTML(r.c.id)}</td><td class="r num"><span class="rpill">${r.rank}</span></td><td>${esc(r.c.name)}${officeFlag(r.c)}${overFlag(r)}${r.c.conv?'':'<span class="flag">편의 없음</span>'}</td>
       <td>${esc(r.c.region)} ${esc(r.c.umd)}</td>
       <td class="r num">${r.score.toFixed(1)}<span class="sbar"><i style="width:${r.score.toFixed(0)}%"></i></span></td>
-      <td class="r">${cmtHTML(r.c)}</td><td class="r num">${fmtEok(r.unit.price)}</td>
+      <td class="r">${cmtHTML(r.c)}</td><td class="r num">${priceOf(r)}</td>
       <td class="r num">${r.unit.area}㎡</td><td class="r num">${payText(r.pay, LAST_I, true)}</td>
       <td class="r num">${getters.transfers(r).toFixed(1)}회</td><td class="r num">${trendHTML(r.unit.trend)}</td><td class="r num">${r.c.built || '-'}</td>
       <td class="dc"><button type="button" class="detailbtn" data-detail="${esc(r.c.id)}">자세히</button></td>
@@ -1110,6 +1178,7 @@ function renderTable(rows){
   $('tabSub').textContent = (q ? `'${q}' 검색 ` : '') + `${rows.length.toLocaleString()}곳` + (list.length > 400 ? ' · 상위 400곳 표시' : '');
   document.querySelectorAll('#tbody tr').forEach(tr => { tr.onclick = () => select(tr.dataset.id, true); tr.onkeydown = e => { if ((e.key === 'Enter' || e.key === ' ') && e.target === tr){ e.preventDefault(); select(tr.dataset.id, true); } }; });
   bindHearts($('tbody')); bindDetail($('tbody'));
+  freezeCols($('tbody').closest('table'));
 }
 
 function select(id, pan){
@@ -1121,6 +1190,13 @@ function select(id, pan){
 }
 
 let robustFn = () => 0;
+// 단지 목록 표: 앞쪽 3열(관심·순위·단지명)을 왼쪽에 고정. 열 너비가 바뀌므로 그릴 때마다 위치를 다시 잰다
+function freezeCols(table, n = 3){
+  const head = table.tHead && table.tHead.rows[0]; if (!head) return;
+  let left = 0; const lefts = [];
+  for (let i = 0; i < n && i < head.cells.length; i++){ lefts.push(left); left += head.cells[i].getBoundingClientRect().width; }
+  for (const row of table.rows) for (let i = 0; i < lefts.length && i < row.cells.length; i++){ row.cells[i].classList.add('fz'); row.cells[i].style.left = lefts[i] + 'px'; }
+}
 function draw(recompute = true){
   const I = readInputs(); LAST_I = I;
   METRICS.forEach(m => { $('wv_' + m.key).textContent = W[m.key]; $('w_' + m.key).style.setProperty('--p', (W[m.key]/60*100) + '%'); });
@@ -1361,6 +1437,13 @@ function jeonseCells(c, u){
   if (!j) return '<td class="num" style="color:var(--t6)">-</td>';
   return `<td class="num" title="최근 12개월 전세 ${j[1]}건">${fmtEok(j[0])}<span class="jr">${Math.round(j[0] / u.price * 100)}%</span></td>`;
 }
+// 같은 평형을 매매로 사면 / 전세로 살면 월 비용 (모아둔 돈을 넣었을 때만)
+function monthlyBothHTML(c, u, j){
+  const I = LAST_I; if (noBudget(I)) return '';
+  const b = purchase(u.price, c.regulated, I), jf = jeonseFin(j[0], I);
+  const t = (f, label) => f.feasible ? (f.loan <= 0 ? '<b>대출 없이 가능</b>' : `<b class="num">월 ${Math.round(f.pay).toLocaleString()}만원</b>${burdenText(f.pay, I)}`) : `<span class="pill-out">${label}</span>`;
+  return `<div class="note" style="color:var(--t3)">내 돈 기준 · 매매면 ${t(b, '예산 초과')} (원리금) · 전세면 ${t(jf, '전세대출 한도 초과')} (이자)</div>`;
+}
 // 단지 상세 상단: 고른 평형의 매매·전세 한눈에 보기(갭 = 매매 − 전세)
 function tradeJeonseHTML(c, u){
   const j = jeonseOf(c, u.area);
@@ -1371,6 +1454,7 @@ function tradeJeonseHTML(c, u){
     <div class="row">${cell('최근 매매', fmtEok(u.price))}${cell('전세 중위', fmtEok(j[0]))}${cell('전세가율', Math.round(j[0] / u.price * 100) + '%')}${cell('갭', gap > 0 ? fmtEok(gap) : '없음')}</div>
     <div class="gbar" role="img" aria-label="매매가 중 전세 ${Math.round(r * 100)}%"><span class="j" style="width:${r * 100}%"></span><span class="g" style="flex:1"></span></div>
     <div class="lg"><span><i style="background:var(--blue)"></i>전세</span><span><i style="background:var(--blue-soft);box-shadow:inset 0 0 0 1px var(--blue)"></i>갭(매매 − 전세)</span></div>
+    ${monthlyBothHTML(c, u, j)}
     <div class="note">전세는 최근 12개월 ${j[1]}건 중위(마지막 ${j[2].replace(/(..)(..)(..)/, '$1.$2.$3')}), 매매는 최근 시세라 시점이 달라요.</div>
   </div>`;
 }
@@ -1502,6 +1586,12 @@ $('coverage').textContent = cov;
   $('gu').onchange = () => { draw.fitted = false; draw(true); };
 }
 document.querySelectorAll('aside input').forEach(el => el.addEventListener('input', () => draw(true)));
+document.querySelectorAll('#modeSeg button').forEach(b => b.onclick = () => {
+  const on = b.getAttribute('aria-pressed') === 'true';
+  if (on && document.querySelectorAll('#modeSeg [aria-pressed="true"]').length === 1) return;   // 하나는 켜 둔다
+  b.setAttribute('aria-pressed', String(!on));
+  draw(true);
+});
 document.querySelectorAll('#sidoSeg button').forEach(b => b.onclick = () => {
   document.querySelectorAll('#sidoSeg button').forEach(x => x.classList.toggle('on', x === b));
   $('gu').value = '';
