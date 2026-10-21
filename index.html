@@ -319,6 +319,23 @@ td.dc{width:60px;padding-right:14px}
 .utbl tr.u{cursor:pointer}
 .utbl tr.u:hover{background:var(--fill-2)}
 .utbl tr.on{background:var(--blue-soft)}
+.utscroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.utbl .jr{color:var(--t5);font-size:.78rem;margin-left:4px}
+.tj{background:var(--fill-2);border-radius:14px;padding:14px;margin:0 0 18px}
+.tj .row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.tj .k{font-size:.74rem;color:var(--t5)}.tj .v{font-size:1.02rem;font-weight:700;color:var(--t1);margin-top:2px}
+.tj .gbar{display:flex;height:10px;border-radius:5px;overflow:hidden;margin-top:12px;background:var(--fill)}
+.tj .gbar .j{background:var(--blue)}.tj .gbar .g{background:var(--blue-soft);box-shadow:inset 0 0 0 1px var(--blue)}
+.tj .lg{display:flex;gap:12px;font-size:.72rem;color:var(--t4);margin-top:6px}
+.tj .lg i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:4px;vertical-align:0}
+.tj .note{font-size:.74rem;color:var(--t5);margin-top:6px}
+.rcbar{margin:12px 0 4px;display:grid;grid-template-columns:auto 1fr auto;gap:8px 10px;align-items:center;font-size:.8rem}
+.rcbar .l{color:var(--t4)}.rcbar .t{height:12px;border-radius:6px;background:var(--fill);position:relative}
+.rcbar .t span{position:absolute;left:0;top:0;bottom:0;border-radius:6px}
+.rcbar .t .rg{background:var(--blue-soft);box-shadow:inset 0 0 0 1px var(--blue)}
+.rcbar .t .mine{width:3px;background:var(--blue);border-radius:2px;left:auto}
+.rcbar .v{font-weight:700;color:var(--t1);text-align:right}
+@media (max-width:520px){.tj .row{grid-template-columns:repeat(2,1fr);gap:10px}.utbl th,.utbl td{padding:8px 4px}.utbl{font-size:.78rem}.utbl .jr{display:block;margin:0}}
 .chart{position:relative;background:var(--fill-2);border-radius:14px;padding:10px 6px 4px}
 .chart svg{display:block;width:100%;height:auto}
 .chart .ax{fill:var(--t5);font-size:10px}
@@ -700,6 +717,7 @@ body.rent main{grid-column:1/-1}
 <script src="seoul_gg.js"></script>
 <script src="subway.js"></script>
 <script src="public_rental.js"></script>
+<script src="rent_summary.js"></script>
 <script>
 const DATA = window.DASHBOARD_DATA || [];
 const META = window.DASHBOARD_META || {};
@@ -1294,6 +1312,7 @@ function renderDetailBody(c, I, d){
       ${stat('가격 흐름', u.trend == null ? '-' : (u.trend > 0 ? '+' : '') + u.trend.toFixed(1) + '%', '최근 6개월 vs 그 전 6개월')}
       ${stat('최근 1년 거래', u.n + '건', `마지막 ${u.latest}`)}
     </div>
+    ${tradeJeonseHTML(c, u)}
     <div class="dt-h">통근 <small>대중교통 최단 경로 추정 · 목적지 역 좌표 기준이라 출입구·출근 시간대 실측과 달라요</small></div>
     ${nearHTML(c)}
     <div class="cmrow">
@@ -1301,11 +1320,11 @@ function renderDetailBody(c, I, d){
       ${stat('<span class="cmt"><span class="lb p">판교</span></span>', Math.round(p.min) + '분', `환승 ${p.transfers}회 · 도보 ${Math.round(p.walk)}분${p.fare ? ' · ' + p.fare.toLocaleString() + '원' : ''}`)}
     </div>
     <div class="dt-h">평형별 시세 <small>행을 누르면 아래 그래프가 바뀌어요</small></div>
-    <table class="utbl"><thead><tr><th>전용면적</th><th>최근 시세</th><th>1년 중위</th><th>가격 흐름</th><th>거래</th><th>월 상환</th></tr></thead><tbody>
+    <div class="utscroll"><table class="utbl"><thead><tr><th>전용</th><th>매매</th><th>흐름</th><th>거래</th><th>전세 <span class="jr">전세가율</span></th><th>월 상환</th></tr></thead><tbody>
       ${c.units.map((x,i) => { const bb = purchase(x.price, c.regulated, I);
-        return `<tr class="u ${i===DT.unitIdx?'on':''}" data-u="${i}"><td class="num">${x.area}㎡</td><td class="num">${fmtEok(x.price)}</td><td class="num">${fmtEok(x.median)}</td>
-        <td class="num">${trendHTML(x.trend)}</td><td class="num">${x.n}건</td><td class="num">${bb.feasible ? Math.round(bb.pay) + '만' : '<span class="pill-out">예산 초과</span>'}</td></tr>`; }).join('')}
-    </tbody></table>
+        return `<tr class="u ${i===DT.unitIdx?'on':''}" data-u="${i}"><td class="num">${x.area}㎡</td><td class="num">${fmtEok(x.price)}</td>
+        <td class="num">${trendHTML(x.trend)}</td><td class="num">${x.n}건</td>${jeonseCells(c, x)}<td class="num">${bb.feasible ? Math.round(bb.pay) + '만' : '<span class="pill-out">예산 초과</span>'}</td></tr>`; }).join('')}
+    </tbody></table></div>
     <div class="dt-h hx"><span class="hxt">실거래 기록</span> <small>전용 ${u.area}㎡ · ${DT.range === '3y' ? '점 하나가 한 달 중위가' : '점 하나가 거래 한 건, 점선은 최근 시세'}</small>
       <span class="rseg" role="group" aria-label="기간"><button type="button" data-r="1y" class="${DT.range !== '3y' ? 'on' : ''}">1년</button><button type="button" data-r="3y" class="${DT.range === '3y' ? 'on' : ''}">3년</button></span></div>
     ${monthAvgHTML(u)}
@@ -1326,6 +1345,73 @@ function renderDetailBody(c, I, d){
       tip.textContent = pt.getAttribute('data-t'); };
     pt.onmouseleave = () => tip.style.display = 'none';
   });
+}
+// 전세: 최근 12개월 아파트 전세(월세 0) 보증금 중위 · rent_summary.js
+const RENT = window.RENT_SUMMARY || {};
+const jeonseOf = (c, area) => (RENT[c.id] || {})[String(Math.round(area))];
+function jeonseCells(c, u){
+  const j = jeonseOf(c, u.area);
+  if (!j) return '<td class="num" style="color:var(--t6)">-</td>';
+  return `<td class="num" title="최근 12개월 전세 ${j[1]}건">${fmtEok(j[0])}<span class="jr">${Math.round(j[0] / u.price * 100)}%</span></td>`;
+}
+// 단지 상세 상단: 고른 평형의 매매·전세 한눈에 보기(갭 = 매매 − 전세)
+function tradeJeonseHTML(c, u){
+  const j = jeonseOf(c, u.area);
+  if (!j) return `<div class="tj"><div class="note">전용 ${u.area}㎡는 최근 12개월 전세 기록이 없어 매매와 비교할 수 없어요.</div></div>`;
+  const r = Math.min(j[0] / u.price, 1), gap = u.price - j[0];
+  const cell = (k, v) => `<div><div class="k">${k}</div><div class="v num">${v}</div></div>`;
+  return `<div class="tj" aria-label="매매와 전세 비교">
+    <div class="row">${cell('최근 매매', fmtEok(u.price))}${cell('전세 중위', fmtEok(j[0]))}${cell('전세가율', Math.round(j[0] / u.price * 100) + '%')}${cell('갭', gap > 0 ? fmtEok(gap) : '없음')}</div>
+    <div class="gbar" role="img" aria-label="매매가 중 전세 ${Math.round(r * 100)}%"><span class="j" style="width:${r * 100}%"></span><span class="g" style="flex:1"></span></div>
+    <div class="lg"><span><i style="background:var(--blue)"></i>전세</span><span><i style="background:var(--blue-soft);box-shadow:inset 0 0 0 1px var(--blue)"></i>갭(매매 − 전세)</span></div>
+    <div class="note">전세는 최근 12개월 ${j[1]}건 중위(마지막 ${j[2].replace(/(..)(..)(..)/, '$1.$2.$3')}), 매매는 최근 시세라 시점이 달라요.</div>
+  </div>`;
+}
+// 공공임대 상세: 반경 1km 안, 전용면적 ±10㎡ 아파트 전세 중위들과 비교
+function nearbyJeonse(lat, lng, area, km = 1){
+  const hits = [];
+  for (const c of DATA){
+    const dy = (c.lat - lat) * 111, dx = (c.lng - lng) * 111 * Math.cos(lat * Math.PI/180);
+    const d = Math.hypot(dx, dy);
+    if (d > km) continue;
+    for (const [b, j] of Object.entries(RENT[c.id] || {}))
+      if (Math.abs(+b - area) <= 10) hits.push({c, area:+b, dep:j[0], n:j[1], d});
+  }
+  hits.sort((a, b) => a.d - b.d);
+  const deps = hits.map(h => h.dep).sort((a, b) => a - b);
+  return {hits, median: deps.length ? deps[Math.floor((deps.length - 1) / 2)] : null, deals: hits.reduce((s, h) => s + h.n, 0)};
+}
+function rentCompareHTML(d){
+  const co = d.building.coordinates;
+  if (!co || !Object.keys(RENT).length) return '';
+  const areas = d.units.map(u => u.exclusive_area_m2).sort((a, b) => a - b), area = areas[Math.floor((areas.length - 1) / 2)];
+  const deps = d.units.map(u => u.deposit_krw / 1e4).sort((a, b) => a - b);
+  const mine = deps[Math.floor((deps.length - 1) / 2)];
+  const nb = nearbyJeonse(co.lat, co.lng, area);
+  if (!nb.median) return `<section class="rsec"><h3>주변 아파트 전세와 비교</h3><p class="rnote">반경 1km 안에 전용 ${Math.round(area)}㎡ 안팎 아파트 전세 기록이 없어요.</p></section>`;
+  const diff = Math.round((mine / nb.median - 1) * 100);
+  return `<section class="rsec">
+      <h3>주변 아파트 전세와 비교 <small>반경 1km · 전용 ${Math.round(area - 10)}~${Math.round(area + 10)}㎡ · 최근 12개월 국토부 실거래</small></h3>
+      <div class="rkv" style="margin:10px 0">
+        <span>이 건물 보증금</span><span><b>${fmtEok(mine)}</b> (호실 중간값 · ${fmtEok(deps[0])}~${fmtEok(deps.at(-1))})</span>
+        <span>주변 전세 중위</span><span><b>${fmtEok(nb.median)}</b> (아파트 ${nb.hits.length}개 평형 · ${nb.deals}건)</span>
+        <span>차이</span><span><b class="${diff > 0 ? 'trend-up' : 'trend-down'}">${diff > 0 ? '+' : ''}${diff}%</b> ${diff > 0 ? '주변 전세보다 비싸요' : '주변 전세보다 싸요'}</span>
+      </div>
+      ${rentBarsHTML(deps, nb)}
+      <div class="utwrap"><table class="utable"><thead><tr><th>가까운 단지</th><th>거리</th><th>전용</th><th>전세 중위</th><th>건수</th></tr></thead><tbody>
+        ${nb.hits.slice(0, 6).map(h => `<tr><td>${esc(h.c.name)}</td><td class="num">${Math.round(h.d * 1000)}m</td><td class="num">${h.area}㎡</td><td class="num">${fmtEok(h.dep)}</td><td class="num">${h.n}건</td></tr>`).join('')}
+      </tbody></table></div>
+      <p class="rnote" style="margin-top:6px">비교 대상은 아파트 전세예요. 이 건물(${esc(d.building.building_type)})과는 관리비·구조·입지 조건이 달라 직접 같은 값으로 보기 어려워요. 통근 데이터가 있는 단지만 포함돼요.</p>
+    </section>`;
+}
+// 공공임대 보증금(호실 범위·중간값) vs 주변 아파트 전세(평형별 중위 범위·중위) 막대
+function rentBarsHTML(deps, nb){
+  const nd = nb.hits.map(h => h.dep), max = Math.max(deps.at(-1), ...nd) * 1.05, pc = v => (v / max * 100).toFixed(1) + '%';
+  const row = (lab, lo, hi, mid) => `<span class="l">${lab}</span><div class="t"><span class="rg" style="left:${pc(lo)};width:calc(${pc(hi)} - ${pc(lo)} + 3px)"></span><span class="mine" style="left:${pc(mid)}"></span></div><span class="v num">${fmtEok(mid)}</span>`;
+  return `<div class="rcbar" role="img" aria-label="이 건물 보증금 ${fmtEok(deps[Math.floor((deps.length - 1) / 2)])}, 주변 전세 중위 ${fmtEok(nb.median)}">
+    ${row('이 건물', deps[0], deps.at(-1), deps[Math.floor((deps.length - 1) / 2)])}
+    ${row('주변 아파트', Math.min(...nd), Math.max(...nd), nb.median)}
+  </div><p class="rnote">옅은 막대는 범위(호실별 보증금 / 단지·평형별 전세 중위), 진한 선은 가운데 값이에요.</p>`;
 }
 // 최근 1개월 평균: 마지막 거래일부터 30일 안의 거래 평균
 function monthAvgHTML(u){
@@ -1891,6 +1977,7 @@ function renderRentDetail(focusSel){
       ${(n.application_restrictions || []).map(x => `<p class="rnote" style="margin-top:6px">${esc(x)}</p>`).join('')}
       <div class="rlinks" style="margin-top:12px">${d.sources.map(x => `<a href="${esc(x.url)}" target="_blank" rel="noopener">${typeName[x.type] || '출처'}${x.scope ? ` ${esc(x.scope)}` : ''}${x.material_year ? ` (${x.material_year})` : ''} ↗</a>`).join('')}</div>
     </section>
+    ${rentCompareHTML(d)}
     <section class="rsec">
       <h3>구조 → 호실 <small>탐색용 분류예요. 같은 묶음이라도 배치가 같다고 확인된 건 아니에요</small></h3>
       <div class="rgroups" role="group" aria-label="구조 묶음">${d.structure_browsing_groups.map(x => `<button type="button" data-g="${esc(x.id)}" aria-pressed="${x.id === (g && g.id)}">${esc(x.label)} <span class="num">${x.unit_ids.length}</span></button>`).join('')}</div>
